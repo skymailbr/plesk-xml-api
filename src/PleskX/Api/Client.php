@@ -85,6 +85,51 @@ class Client
         return new SimpleXMLElement($content);
     }
 
+
+    /**
+     * Recursive function that transforms array in XML
+     *
+     * @param array $attributes
+     * @param SimpleXMLElement $xmlData
+     * @return SimpleXMLElement
+     */
+    protected function _createXml( $data, &$xmlData ) {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                if (is_numeric($key)) {
+                    $key = array_keys($data[$key])[0];
+                    $subnode = $xmlData->addChild($key);
+                    foreach ($value[$key] as $k => $v) {
+                        if (is_array($v)) {
+                            $this->_createXml($v, $subnode);
+                        } else {
+                            $subnode->addChild("$k",htmlspecialchars("$v"));
+                        }
+                    }
+                } else {
+                    $subnode = $xmlData->addChild($key);
+                    $this->_createXml($value, $subnode);
+                }
+            } else {
+                $xmlData->addChild("$key",htmlspecialchars("$value"));
+            }
+        }
+    }
+
+    /**
+     * Gen XML Request by Array
+     *
+     * @param array $attributes
+     * @param string|null $version
+     * @return SimpleXMLElement
+     */
+    public function genRequestXml($attributes, $version = null)
+    {
+        $res = $this->getPacket($version);
+        $this->_createXml($attributes,$res);
+        return $res;
+    }
+
     /**
      * Perform API request
      *

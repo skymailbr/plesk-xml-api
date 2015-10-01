@@ -4,16 +4,54 @@
 class WebspaceTest extends TestCase
 {
 
+    private $webspaceSiteName = 'example-test-parent.dom';
+    private $siteName = 'example-test-child.dom';
+
     /**
+     * 
+     *
      * @return \PleskX\Api\Struct\Webspace\Info
      */
     private function _createWebspace()
     {
+
         $ips = $this->_client->ip()->get();
         $ipInfo = reset($ips);
+
         return $this->_client->webspace()->create([
-            'name' => 'example-test.dom',
-            'ip_address' => $ipInfo->ipAddress,
+            'gen_setup' => [
+                'name' => $this->webspaceSiteName,
+                'ip_address' => $ipInfo->ipAddress,
+                'htype' => 'vrt_hst'
+            ],
+            'hosting' => [
+                'vrt_hst' => [
+                    ['property' => [
+                        'name' => 'ftp_login',
+                        'value' => 'ftpusertest',
+                    ]],
+                    ['property' => [
+                        'name' => 'ftp_password',
+                        'value' => 'ftpuserpasswordtest',
+                    ]],
+                    'ip_address' => $ipInfo->ipAddress
+                ],
+            ],
+            'plan-name' => 'basic'
+        ]);
+
+    }
+
+    /**
+     * @return \PleskX\Api\Struct\Webspace\Info
+     */
+    private function _createSite($webspace)
+    {
+        return $this->_client->site()->create([
+            'gen_setup' => [
+                'name' => $this->siteName,
+                'webspace-id' => $webspace->id
+            ],
         ]);
     }
 
@@ -62,9 +100,45 @@ class WebspaceTest extends TestCase
     {
         $webspace = $this->_createWebspace();
         $webspaceInfo = $this->_client->webspace()->get('id', $webspace->id);
-        $this->assertEquals('example-test.dom', $webspaceInfo->name);
+        $this->assertEquals($this->webspaceSiteName, $webspaceInfo->name);
 
         $this->_client->webspace()->delete('id', $webspace->id);
     }
+
+    public function testCreateSite()
+    {
+        $webspace = $this->_createWebspace();
+        $site = $this->_createSite($webspace);
+
+        $this->assertInternalType('integer', $site->id);
+        $this->assertGreaterThan(0, $site->id);
+
+        $this->_client->site()->delete('id', $site->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testDeleteSite()
+    {
+        $webspace = $this->_createWebspace();
+        $site = $this->_createSite($webspace);
+
+        $result = $this->_client->site()->delete('id', $site->id);
+        $this->assertTrue($result);
+
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testGetSite()
+    {
+        $webspace = $this->_createWebspace();
+        $site = $this->_createSite($webspace);
+
+        $siteInfo = $this->_client->site()->get('id', $site->id);
+        $this->assertEquals($this->siteName, $siteInfo->name);
+
+        $this->_client->site()->delete('id', $site->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
 
 }

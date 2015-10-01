@@ -31,13 +31,8 @@ class Webspace extends \PleskX\Api\Operator
      */
     public function create($properties)
     {
-        $packet = $this->_client->getPacket();
-        $info = $packet->addChild('webspace')->addChild('add')->addChild('gen_setup');
-
-        foreach ($properties as $name => $value) {
-            $info->addChild($name, $value);
-        }
-
+        $properties = ['webspace' => ['add' => $properties]];
+        $packet = $this->_client->genRequestXml($properties);
         $response = $this->_client->request($packet);
         return new Struct\Info($response);
     }

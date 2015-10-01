@@ -1,3 +1,7 @@
 /php/tests/node_modules
 /vendor
 /phpunit.xml
+composer.lock
+composer.phar
+node_modules
+
