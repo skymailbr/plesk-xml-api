@@ -1,14 +1,12 @@
 ## PHP library for Plesk API-RPC
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/plesk/api-php-lib/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/plesk/api-php-lib/?branch=master)
-
 PHP object-oriented library for Plesk API-RPC.
 
 ## Install Via Composer
 
 [Composer](https://getcomposer.org/) is a preferable way to install the library:
 
-`composer require plesk/api-php-lib:@dev`
+`composer require lucasmarin/api-php-lib:@dev-master`
 
 ## How to Run Unit Tests
 
@@ -16,11 +14,11 @@ One the possible ways to become familiar with the library is to check the unit t
 
 To run the unit tests use the following command:
 
-`REMOTE_HOST=your-plesk-host.dom REMOTE_PASSWORD=password phpunit`
+`REMOTE_HOST=your-plesk-host.dom REMOTE_PASSWORD=password REMOTE_LOGIN=login phpunit`
 
 ## Using Grunt for Continuous Testing
 
 * Install Node.js
 * Install dependencies via `npm install` command
-* Run `REMOTE_HOST=your-plesk-host.dom REMOTE_PASSWORD=password grunt watch:test`
+* Run `REMOTE_HOST=your-plesk-host.dom REMOTE_PASSWORD=password REMOTE_LOGIN=user grunt watch:test`
 

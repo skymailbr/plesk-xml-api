@@ -50,7 +50,10 @@ class Webspace extends \PleskX\Api\Operator
         return 'ok' === (string)$response->status;
     }
 
+
     /**
+     * Get gen_info of webspace [name,guid]
+     *
      * @param string $field
      * @param integer|string $value
      * @return Struct\GeneralInfo
@@ -64,5 +67,31 @@ class Webspace extends \PleskX\Api\Operator
         $response = $this->_client->request($packet);
         return new Struct\GeneralInfo($response->data->gen_info);
     }
+
+    
+    /**
+     * Get Data of webspace 
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @return Struct\Data
+     */
+    public function getData($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('webspace')->addChild('get');
+        $getTag->addChild('filter')->addChild($field, $value);
+        $dataset = $getTag->addChild('dataset');
+        $dataset->addChild('gen_info');
+        $dataset->addChild('hosting');
+        $dataset->addChild('limits');
+        $dataset->addChild('stat');
+        $dataset->addChild('prefs');
+        $dataset->addChild('disk_usage');
+        $dataset->addChild('performance');
+        $response = $this->_client->request($packet);
+        return new Struct\Data($response->data);
+    }
+
 
 }

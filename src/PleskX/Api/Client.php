@@ -87,7 +87,7 @@ class Client
 
 
     /**
-     * Recursive function that transforms array in XML
+     * Recursive function that transforms array to XML
      *
      * @param array $attributes
      * @param SimpleXMLElement $xmlData

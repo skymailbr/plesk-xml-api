@@ -21,7 +21,7 @@ abstract class Struct
     protected function _initScalarProperties($apiResponse, array $properties)
     {
         foreach ($properties as $property) {
-            if (is_array($property)) {
+            if (is_array($property) || is_object($property)) {
                 $classPropertyName = current($property);
                 $value = $apiResponse->{key($property)};
             } else {
@@ -31,7 +31,7 @@ abstract class Struct
 
             $reflectionProperty = new \ReflectionProperty($this, $classPropertyName);
             $docBlock = $reflectionProperty->getDocComment();
-            $propertyType = preg_replace('/^.+ @var ([a-z]+) .+$/', '\1', $docBlock);
+            $propertyType = trim(preg_replace('/^.+ @var ([^\*]+) .+$/', '\1', $docBlock));
 
             if ('string' == $propertyType) {
                 $value = (string)$value;
@@ -40,7 +40,10 @@ abstract class Struct
             } else if ('boolean' == $propertyType) {
                 $value = in_array((string)$value, ['true', 'on', 'enabled']);
             } else {
-                throw new \Exception("Unknown property type '$propertyType'.");
+                if ( class_exists($propertyType) ) {
+                    $value = new $propertyType($value);
+                } else
+                    throw new \Exception("Unknown property type '$propertyType'.");
             }
 
             $this->$classPropertyName = $value;
@@ -53,9 +56,9 @@ abstract class Struct
      * @param string $under
      * @return string
      */
-    private function _underToCamel($under)
+    protected function _underToCamel($under)
     {
-        $under = '_' . str_replace('_', ' ', strtolower($under));
+        $under = '_' . str_replace(['_','-'], ' ', strtolower($under));
         return ltrim(str_replace(' ', '', ucwords($under)), '_');
     }
 

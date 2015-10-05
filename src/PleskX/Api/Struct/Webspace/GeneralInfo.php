@@ -5,17 +5,65 @@ namespace PleskX\Api\Struct\Webspace;
 
 class GeneralInfo extends \PleskX\Api\Struct
 {
-    /** @var string */
+    /**  @var string */
+    public $crDate;
+
+    /**  @var string */
     public $name;
 
-    /** @var string */
+    /**  @var string */
+    public $asciiName;
+
+    /**  @var string */
+    public $status;
+
+    /**  @var integer */
+    public $realSize;
+
+    /**  @var string */
+    public $ownerLogin;
+
+    /**  @var string */
+    public $dnsIpAddress;
+
+    /**  @var string */
+    public $htype;
+
+    /**  @var string */
     public $guid;
+
+    /**  @var string */
+    public $vendorGuid;
+
+    /**  @var string */
+    public $externalId;
+
+    /**  @var string */
+    public $sbSiteUuid;
+
+    /**  @var string */
+    public $description;
+
+    /**  @var string  */
+    public $adminDescription;
 
     public function __construct($apiResponse)
     {
         $this->_initScalarProperties($apiResponse, [
+            'cr_date',
             'name',
+            'ascii-name',
+            'status',
+            'real_size',
+            'owner-login',
+            'dns_ip_address',
+            'htype',
             'guid',
+            'vendor-guid',
+            'external-id',
+            'sb-site-uuid',
+            'description',
+            'admin-description'
         ]);
     }
 }
