@@ -14,7 +14,7 @@ class Hosting extends \PleskX\Api\Struct
         $this->_hostingScalarProperties($apiResponse, ['property']);
     }
 
-    private function _hostingScalarProperties($apiResponse,$arrayElement)
+    private function _hostingScalarProperties($apiResponse, array $arrayElement)
     {
         $sxe = new \SimpleXmlIterator($apiResponse->asXML());
         for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
@@ -22,7 +22,7 @@ class Hosting extends \PleskX\Api\Struct
             $this->types[$k] = new \stdClass();
             if ( $sxe->hasChildren() ) {
                 foreach ($sxe->getChildren() as $element => $value) {
-                    if ( in_array($element, $arrayElement) ) {
+                    if ( FALSE !== in_array($element, $arrayElement) ) {
                         $this->types[$k]->{parent::_underToCamel($value->name)} = $value->value;
                     } else {
                         $this->types[$k]->{parent::_underToCamel($element)} = $value;

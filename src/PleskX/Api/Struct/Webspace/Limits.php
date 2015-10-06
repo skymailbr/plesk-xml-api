@@ -6,25 +6,28 @@ namespace PleskX\Api\Struct\Webspace;
 class Limits extends \PleskX\Api\Struct
 {
 
-    /** @var stdObject **/
-    public $limits;
+    /** @var stdClass **/
+    public $limit;
 
     /** @var string **/
     public $overuse;
 
     public function __construct($apiResponse)
     {
-        $this->_limitScalarProperties($apiResponse);
+        $this->_limitScalarProperties($apiResponse,['limit']);
     }
 
-    private function _limitScalarProperties( $apiResponse )
+    private function _limitScalarProperties($apiResponse, array $arrayElement)
     {
-        foreach ($apiResponse as $attr => $obj) {
-            if (is_array($obj)) {
-                foreach ($obj as $key => $v) {
-                    $this->{$attr}->{parent::_underToCamel($v->name)} = $v->value;
-                }
-            } else $this->{$this->_underToCamel($attr)} = $obj;
+        foreach( $arrayElement as $el ) {
+            $this->{$el} = new \stdClass();
+        }
+        $sxe = new \SimpleXmlIterator($apiResponse->asXML());
+        for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
+            $k = $sxe->key();
+            if ( FALSE !== in_array($k, $arrayElement) ) {
+                $this->{$k}->{parent::_underToCamel($sxe->current()->name)} = $sxe->current()->value;
+            } else $this->{parent::_underToCamel($k)} = $sxe->current();
         }
     }
 
