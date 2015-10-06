@@ -34,7 +34,7 @@ class Data extends \PleskX\Api\Struct
             'limits',
             'stat',
             'prefs',
-            'disk-usage',
+            'disk_usage',
             'performance'
         ]);
     }

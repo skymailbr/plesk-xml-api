@@ -20,12 +20,13 @@ abstract class Struct
      */
     protected function _initScalarProperties($apiResponse, array $properties)
     {
+
         foreach ($properties as $property) {
-            if (is_array($property) || is_object($property)) {
+            if (is_array($property)) {
                 $classPropertyName = current($property);
                 $value = $apiResponse->{key($property)};
             } else {
-                $classPropertyName = $this->_underToCamel(str_replace('-', '_', $property));
+                $classPropertyName = $this->_underToCamel($property);
                 $value = $apiResponse->$property;
             }
 
@@ -40,9 +41,8 @@ abstract class Struct
             } else if ('boolean' == $propertyType) {
                 $value = in_array((string)$value, ['true', 'on', 'enabled']);
             } else {
-                if ( class_exists($propertyType) ) {
-                    $value = new $propertyType($value);
-                } else
+                if ( class_exists($propertyType) ) $value = new $propertyType($value);
+                else
                     throw new \Exception("Unknown property type '$propertyType'.");
             }
 

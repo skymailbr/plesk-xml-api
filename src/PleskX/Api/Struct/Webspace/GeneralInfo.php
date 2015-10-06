@@ -52,18 +52,18 @@ class GeneralInfo extends \PleskX\Api\Struct
         $this->_initScalarProperties($apiResponse, [
             'cr_date',
             'name',
-            'ascii-name',
+            ['ascii-name' => 'asciiName'],
             'status',
             'real_size',
-            'owner-login',
+            ['owner-login' => 'ownerLogin'],
             'dns_ip_address',
             'htype',
             'guid',
-            'vendor-guid',
-            'external-id',
-            'sb-site-uuid',
+            ['vendor-guid' => 'vendorGuid'],
+            ['external-id' => 'externalId'],
+            ['sb-site-uuid' => 'sbSiteUuid'],
             'description',
-            'admin-description'
+            ['admin-description' => 'adminDescription']
         ]);
     }
 }
