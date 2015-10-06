@@ -67,7 +67,6 @@ class Webspace extends \PleskX\Api\Operator
         $response = $this->_client->request($packet);
         return new Struct\GeneralInfo($response->data->gen_info);
     }
-
     
     /**
      * Get Data of webspace 
