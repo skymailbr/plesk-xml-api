@@ -93,5 +93,25 @@ class Webspace extends \PleskX\Api\Operator
         return new Struct\Data($response->data);
     }
 
+    /**
+     * Get Traffic of webspace 
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @param DateTime $sinceDate optional
+     * @param DateTime $toDate optional
+     * @return Struct\Data
+     */
+    public function getTraffic($field, $value, $sinceDate = NULL, $toDate = NULL )
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('webspace')->addChild('get_traffic');
+        $getTag->addChild('filter')->addChild($field, $value);
+        if ( $sinceDate ) $getTag->addChild('since_date', $sinceDate->format('Y-m-d'));
+        if ( $toDate ) $getTag->addChild('to_date', $toDate->format('Y-m-d'));
+        $response = $this->_client->request($packet);
+        return new Struct\Traffic($response->traffic);
+    }
+
 
 }
