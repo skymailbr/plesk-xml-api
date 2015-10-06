@@ -6,7 +6,7 @@ class WebspaceTest extends TestCase
 
     private $webspaceSiteName = 'example-test-parent.dom';
     private $siteName = 'example-test-child.dom';
-    private $trafficTestSite = 'exal.com.br'; //SITE HOSTED BY MY PLESK
+    private $trafficTestSite = 'worksecurity.net'; //SITE HOSTED BY MY PLESK
 
     /**
      * 

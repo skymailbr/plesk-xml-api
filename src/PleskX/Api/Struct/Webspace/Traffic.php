@@ -35,7 +35,11 @@ class Traffic extends \PleskX\Api\Struct
      * @throws \Exception
      */
     protected function _trafficScalarProperties( $apiResponse ) {
-        $this->sinceDate = $apiResponse->xpath('//traffic')[0]->date;
+
+        $first = $apiResponse->xpath('//traffic');
+        if ( ! $first ) return;
+
+        $this->sinceDate = $first[0]->date;
         $this->toDate = $apiResponse->xpath('//traffic[last()]')[0]->date;
         foreach( $apiResponse as $i => $traffic ) {
             $this->httpIn += $traffic->http_in;
