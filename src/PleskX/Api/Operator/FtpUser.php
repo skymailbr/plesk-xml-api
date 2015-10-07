@@ -49,12 +49,14 @@ class FtpUser extends \PleskX\Api\Operator
         $getTag = $packet->addChild('ftp-user')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'ftp-user'}->get->result;
-        if ( $field == 'id' ) {
+        $ret = NULL;
+        if ( $field == 'id' && isset( $response->id ) ) {
             $ret = new Struct\GeneralInfo($response);
         } else {
             $ret = [];
             foreach ($response as $f) {
-                $ret[] = new Struct\GeneralInfo($f);
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\GeneralInfo($f);
             }
         }
         return $ret;

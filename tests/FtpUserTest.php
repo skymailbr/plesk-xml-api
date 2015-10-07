@@ -82,7 +82,8 @@ class FtpUserTest extends TestCase
         $ftpuser2 = $this->_createFtpUser( $webspace, 'ftpuser22' );
 
         $ftpUserInfo = $this->_client->ftpUser()->get('webspace-id', $webspace->id);
-        $this->assertGreaterThan(0, $ftpuser2->id);
+        $this->assertGreaterThan(0, $ftpUserInfo[0]->id);
+        $this->assertGreaterThan(0, $ftpUserInfo[1]->id);
 
         $this->_client->ftpuser()->delete('id', $ftpuser1->id);
         $this->_client->ftpuser()->delete('id', $ftpuser2->id);
