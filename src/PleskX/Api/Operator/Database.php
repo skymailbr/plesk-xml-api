@@ -61,4 +61,60 @@ class Database extends \PleskX\Api\Operator
         }
         return $ret;
     }
+
+
+    /**
+     * Create database user
+     *
+     * @param array $properties
+     * @return Struct\InfoUser
+     */
+    public function createUser($properties)
+    {
+        $properties = ['database' => ['add-db-user' => $properties]];
+        $packet = $this->_client->genRequestXml($properties);
+        $response = $this->_client->request($packet);
+        return new Struct\InfoUser($response);
+    }
+
+    /**
+     * Delete Database user
+     * @param string $field
+     * @param integer|string $value
+     * @return bool
+     */
+    public function deleteUser($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $packet->addChild('database')->addChild('del-db-user')->addChild('filter')->addChild($field, $value);
+        $response = $this->_client->request($packet);
+        return 'ok' === (string)$response->status;
+    }
+
+    /**
+     * Get database user
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @return mixed Struct\GeneralInfoUser|Array
+     */
+    public function getUser($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('database')->addChild('get-db-users');
+        $getTag->addChild('filter')->addChild($field, $value);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'database'}->{'get-db-users'}->result;
+        $ret = NULL;
+        if ( $field == 'id' && isset( $response->id ) ) {
+            $ret = new Struct\GeneralInfoUser($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\GeneralInfoUser($f);
+            }
+        }
+        return $ret;
+    }
+
 }

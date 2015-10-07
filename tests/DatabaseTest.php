@@ -46,33 +46,42 @@ class DatabaseTest extends TestCase
         ]);
     }
 
-    // public function testCreate()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $database = $this->_createDatabase( $webspace );
-    //     $this->assertGreaterThan(0, $database->id);
-    //     $this->_client->database()->delete('id', $database->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    private function _createUser( $database, $login = 'newuserdatabase' )
+    {
+        return $this->_client->database()->createUser([
+            'db-id' => $database->id,
+            'login' => $login,
+            'password' => 'dbpassword'
+        ]);
+    }
 
-    // public function testDelete()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $database = $this->_createDatabase( $webspace );
-    //     $result = $this->_client->database()->delete('id', $database->id);
-    //     $this->assertTrue($result);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testCreate()
+    {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $this->assertGreaterThan(0, $database->id);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
 
-    // public function testGet()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $database = $this->_createDatabase( $webspace );
-    //     $databaseInfo = $this->_client->database()->get('id', $database->id);
-    //     $this->assertGreaterThan(0, $databaseInfo->id);
-    //     $this->_client->database()->delete('id', $database->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testDelete()
+    {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $result = $this->_client->database()->delete('id', $database->id);
+        $this->assertTrue($result);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testGet()
+    {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $databaseInfo = $this->_client->database()->get('id', $database->id);
+        $this->assertGreaterThan(0, $databaseInfo->id);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
 
     public function testGetAllWebspace()
     {
@@ -89,5 +98,35 @@ class DatabaseTest extends TestCase
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
+    public function testCreateUser() {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $user = $this->_createUser( $database );
+        $this->assertGreaterThan(0, $user->id);
+        $this->_client->database()->deleteUser('id', $user->id);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testDeleteUser() {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $user = $this->_createUser( $database );
+        $result = $this->_client->database()->deleteUser('id', $user->id);
+        $this->assertTrue($result);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testGetUser() {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $user = $this->_createUser( $database );
+        $userInfo = $this->_client->database()->getUser('id', $user->id);
+        $this->assertGreaterThan(0, $userInfo->id);
+        $this->_client->database()->deleteUser('id', $user->id);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
 
 }
