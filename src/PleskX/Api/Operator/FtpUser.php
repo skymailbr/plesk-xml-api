@@ -41,15 +41,23 @@ class FtpUser extends \PleskX\Api\Operator
      *
      * @param string $field
      * @param integer|string $value
-     * @return Struct\GeneralInfo
+     * @return mixed Struct\GeneralInfo|Array
      */
     public function get($field, $value)
     {
         $packet = $this->_client->getPacket();
         $getTag = $packet->addChild('ftp-user')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
-        return new Struct\GeneralInfo($response);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'ftp-user'}->get->result;
+        if ( $field == 'id' ) {
+            $ret = new Struct\GeneralInfo($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                $ret[] = new Struct\GeneralInfo($f);
+            }
+        }
+        return $ret;
     }
 
 }

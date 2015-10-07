@@ -37,10 +37,10 @@ class FtpUserTest extends TestCase
     }
 
 
-    private function _createFtpUser( $webspace )
+    private function _createFtpUser( $webspace, $name = 'newftpuser' )
     {
         return $this->_client->ftpUser()->create([
-            'name' => 'newftpuser',
+            'name' => $name,
             'password' => 'userpassword',
             'home' => '',
             'webspace-id' => $webspace->id
@@ -74,5 +74,20 @@ class FtpUserTest extends TestCase
         $this->_client->ftpuser()->delete('id', $ftpuser->id);
         $this->_client->webspace()->delete('id', $webspace->id);
     }
+
+    public function testGetAllWebspace()
+    {
+        $webspace = $this->_createWebspace();
+        $ftpuser1 = $this->_createFtpUser( $webspace );
+        $ftpuser2 = $this->_createFtpUser( $webspace, 'ftpuser22' );
+
+        $ftpUserInfo = $this->_client->ftpUser()->get('webspace-id', $webspace->id);
+        $this->assertGreaterThan(0, $ftpuser2->id);
+
+        $this->_client->ftpuser()->delete('id', $ftpuser1->id);
+        $this->_client->ftpuser()->delete('id', $ftpuser2->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
 
 }
