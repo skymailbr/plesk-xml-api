@@ -3,7 +3,62 @@
 
 namespace PleskX\Api\Operator;
 
+use PleskX\Api\Struct\Database as Struct;
+
 class Database extends \PleskX\Api\Operator
 {
 
+    /**
+     * Create database
+     *
+     * @param array $properties
+     * @return Struct\Info
+     */
+    public function create($properties)
+    {
+        $properties = ['database' => ['add-db' => $properties]];
+        $packet = $this->_client->genRequestXml($properties);
+        $response = $this->_client->request($packet);
+        return new Struct\Info($response);
+    }
+
+    /**
+     * Delete Database
+     * @param string $field
+     * @param integer|string $value
+     * @return bool
+     */
+    public function delete($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $packet->addChild('database')->addChild('del-db')->addChild('filter')->addChild($field, $value);
+        $response = $this->_client->request($packet);
+        return 'ok' === (string)$response->status;
+    }
+
+    /**
+     * Get database
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @return mixed Struct\GeneralInfo|Array
+     */
+    public function get($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('database')->addChild('get-db');
+        $getTag->addChild('filter')->addChild($field, $value);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'database'}->{'get-db'}->result;
+        $ret = NULL;
+        if ( $field == 'id' && isset( $response->id ) ) {
+            $ret = new Struct\GeneralInfo($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\GeneralInfo($f);
+            }
+        }
+        return $ret;
+    }
 }
