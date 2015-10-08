@@ -88,8 +88,18 @@ class SiteTest extends TestCase
     {
         $webspace = $this->_createWebspace();
         $site = $this->_createSite($webspace);
-        $siteInfo = $this->_client->site()->get('id', $site->id);
-        $this->assertEquals($this->siteName, $siteInfo->name);
+        $siteInfo = $this->_client->site()->getData('id', $site->id);
+        $this->assertEquals($this->siteName, $siteInfo->genInfo->name);
+        $this->_client->site()->delete('id', $site->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testDataSearchBySpace()
+    {
+        $webspace = $this->_createWebspace();
+        $site = $this->_createSite($webspace);
+        $siteInfo = $this->_client->site()->getData('parent-id', $webspace->id);
+        $this->assertEquals($this->siteName, $siteInfo[0]->genInfo->name);
         $this->_client->site()->delete('id', $site->id);
         $this->_client->webspace()->delete('id', $webspace->id);
     }

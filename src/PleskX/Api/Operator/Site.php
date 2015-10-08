@@ -28,7 +28,7 @@ class Site extends \PleskX\Api\Operator
      *
      * @param string $field
      * @param integer|string $value
-     * @return Struct\Data
+     * @return mixed Array|Struct\Data 
      */
     public function getData($field, $value)
     {
@@ -41,8 +41,17 @@ class Site extends \PleskX\Api\Operator
         $dataset->addChild('stat');
         $dataset->addChild('prefs');
         $dataset->addChild('disk_usage');
-        $response = $this->_client->request($packet);
-        return new Struct\Data($response->data);
+        $ret = NULL;
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'site'}->{'get'}->result;
+        if ( in_array($field,['id','name','guid']) && isset( $response->id ) ) {
+            $ret = new Struct\Data($response->data);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) $ret[] = new Struct\Data($f->data);
+            }
+        }
+        return $ret;
     }
 
     /**
