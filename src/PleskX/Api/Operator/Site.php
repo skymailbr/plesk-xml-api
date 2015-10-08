@@ -3,7 +3,7 @@
 
 namespace PleskX\Api\Operator;
 
-use PleskX\Api\Struct\Webspace as Struct;
+use PleskX\Api\Struct\Site as Struct;
 
 class Site extends \PleskX\Api\Operator
 {
@@ -23,6 +23,27 @@ class Site extends \PleskX\Api\Operator
         return new Struct\GeneralInfo($response->data->gen_info);
     }
 
+    /**
+     * Get Data of site 
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @return Struct\Data
+     */
+    public function getData($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('site')->addChild('get');
+        $getTag->addChild('filter')->addChild($field, $value);
+        $dataset = $getTag->addChild('dataset');
+        $dataset->addChild('gen_info');
+        $dataset->addChild('hosting');
+        $dataset->addChild('stat');
+        $dataset->addChild('prefs');
+        $dataset->addChild('disk_usage');
+        $response = $this->_client->request($packet);
+        return new Struct\Data($response->data);
+    }
 
     /**
      * @param array $properties
