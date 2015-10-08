@@ -88,6 +88,7 @@ class Webspace extends \PleskX\Api\Operator
         $dataset->addChild('prefs');
         $dataset->addChild('disk_usage');
         $dataset->addChild('performance');
+        $dataset->addChild('subscriptions');
         $response = $this->_client->request($packet);
         return new Struct\Data($response->data);
     }

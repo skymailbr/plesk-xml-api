@@ -26,6 +26,9 @@ class Data extends \PleskX\Api\Struct
     /** @var PleskX\Api\Struct\Webspace\Perfomance **/
     public $performance;
 
+    /** @var PleskX\Api\Struct\Webspace\Subscriptions **/
+    public $subscriptions;
+
     public function __construct($apiResponse)
     {
         $this->_initScalarProperties($apiResponse, [
@@ -35,7 +38,8 @@ class Data extends \PleskX\Api\Struct
             'stat',
             'prefs',
             'disk_usage',
-            'performance'
+            'performance',
+            'subscriptions'
         ]);
     }
 }
