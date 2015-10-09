@@ -55,42 +55,53 @@ class SiteAliasTest extends TestCase
         ]);
     }
 
-    public function testGet() {
+    // public function testGet() {
+    //     $webspace = $this->_createWebspace();
+    //     $siteAlias = $this->_createSiteAlias($webspace);
+    //     $siteAlias = $this->_client->siteAlias()->get('id', $siteAlias->id);
+    //     $this->assertEquals($this->aliasName, $siteAlias->name);
+    //     $this->_client->siteAlias()->delete('id', $siteAlias->id);
+    //     $this->_client->webspace()->delete('id', $webspace->id);
+    // }
+
+    public function testGetSearchBySiteName()
+    {
         $webspace = $this->_createWebspace();
         $siteAlias = $this->_createSiteAlias($webspace);
-        $siteAlias = $this->_client->siteAlias()->get('id', $siteAlias->id);
-        $this->assertEquals($this->aliasName, $siteAlias->name);
-        $this->_client->siteAlias()->delete('id', $siteAlias->id);
+        $siteAlias = $this->_client->siteAlias()->get('site-id', $webspace->id);
+        $this->assertEquals($this->aliasName, $siteAlias[0]->name);
+        $this->_client->siteAlias()->delete('id', $siteAlias[0]->id);
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
-    public function testCreate() {
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->_createSiteAlias($webspace);
-        $this->assertInternalType('integer', $siteAlias->id);
-        $this->assertGreaterThan(0, $siteAlias->id);
-        $this->_client->siteAlias()->delete('id', $siteAlias->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
-    }
 
-    public function testDelete() {
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->_createSiteAlias($webspace);
-        $result = $this->_client->siteAlias()->delete('id', $siteAlias->id);
-        $this->assertTrue($result);
-        $this->_client->webspace()->delete('id', $webspace->id);
-    }
+    // public function testCreate() {
+    //     $webspace = $this->_createWebspace();
+    //     $siteAlias = $this->_createSiteAlias($webspace);
+    //     $this->assertInternalType('integer', $siteAlias->id);
+    //     $this->assertGreaterThan(0, $siteAlias->id);
+    //     $this->_client->siteAlias()->delete('id', $siteAlias->id);
+    //     $this->_client->webspace()->delete('id', $webspace->id);
+    // }
 
-    public function testRename() {
+    // public function testDelete() {
+    //     $webspace = $this->_createWebspace();
+    //     $siteAlias = $this->_createSiteAlias($webspace);
+    //     $result = $this->_client->siteAlias()->delete('id', $siteAlias->id);
+    //     $this->assertTrue($result);
+    //     $this->_client->webspace()->delete('id', $webspace->id);
+    // }
 
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->_createSiteAlias($webspace);
-        $result = $this->_client->siteAlias()->rename('id', $siteAlias->id, $this->aliasNewName);
-        $this->assertTrue($result);
-        $siteAlias = $this->_client->siteAlias()->get('id', $siteAlias->id);
-        $this->assertEquals($this->aliasNewName, $siteAlias->name);
-        $this->_client->siteAlias()->delete('id', $siteAlias->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
-    }
+    // public function testRename() {
+
+    //     $webspace = $this->_createWebspace();
+    //     $siteAlias = $this->_createSiteAlias($webspace);
+    //     $result = $this->_client->siteAlias()->rename('id', $siteAlias->id, $this->aliasNewName);
+    //     $this->assertTrue($result);
+    //     $siteAlias = $this->_client->siteAlias()->get('id', $siteAlias->id);
+    //     $this->assertEquals($this->aliasNewName, $siteAlias->name);
+    //     $this->_client->siteAlias()->delete('id', $siteAlias->id);
+    //     $this->_client->webspace()->delete('id', $webspace->id);
+    // }
 
 }

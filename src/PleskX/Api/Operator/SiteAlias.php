@@ -18,8 +18,17 @@ class SiteAlias extends \PleskX\Api\Operator
         $packet = $this->_client->getPacket();
         $getTag = $packet->addChild('site-alias')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
-        return new Struct\GeneralInfo($response);
+        $ret = NULL;
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'site-alias'}->{'get'}->result;
+        if ( in_array($field,['id','name']) && isset( $response->id ) ) {
+            $ret = new Struct\GeneralInfo($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) $ret[] = new Struct\GeneralInfo($f);
+            }
+        }
+        return $ret;
     }
 
 
