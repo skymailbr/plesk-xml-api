@@ -691,4 +691,12 @@ class Client
         return $this->_getOperator('WpInstance');
     }
 
+    /**
+     * @return Operator\PHPHandler
+     */
+    public function phpHandler()
+    {
+        return $this->_getOperator('PHPHandler');
+    }
+
 }
