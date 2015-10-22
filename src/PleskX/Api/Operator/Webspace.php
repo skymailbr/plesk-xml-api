@@ -90,7 +90,7 @@ class Webspace extends \PleskX\Api\Operator
         $dataset->addChild('performance');
         $dataset->addChild('subscriptions');
         $response = $this->_client->request($packet);
-        return new Struct\Data($response->data);
+        return new Struct\Data($response);
     }
 
     /**

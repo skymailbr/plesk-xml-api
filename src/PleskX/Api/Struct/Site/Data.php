@@ -7,7 +7,7 @@ class Data extends \PleskX\Api\Struct
 {
 
     /** @var integer **/
-    public $integer;
+    public $id;
 
     /** @var PleskX\Api\Struct\Site\GeneralInfo **/
     public $genInfo;
@@ -26,8 +26,10 @@ class Data extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->_initScalarProperties($apiResponse, [
-            'integer',
+        $data = $apiResponse->data;
+        $data->addChild('id',$apiResponse->id);
+        $this->_initScalarProperties($data, [
+            'id',
             'gen_info',
             'hosting',
             'stat',

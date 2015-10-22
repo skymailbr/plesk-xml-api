@@ -44,11 +44,11 @@ class Site extends \PleskX\Api\Operator
         $ret = NULL;
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'site'}->{'get'}->result;
         if ( in_array($field,['id','name','guid']) && isset( $response->id ) ) {
-            $ret = new Struct\Data($response->data);
+            $ret = new Struct\Data($response);
         } else {
             $ret = [];
             foreach ($response as $f) {
-                if ( isset( $f->id ) ) $ret[] = new Struct\Data($f->data);
+                if ( isset( $f->id ) ) $ret[] = new Struct\Data($f);
             }
         }
         return $ret;

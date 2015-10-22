@@ -35,7 +35,9 @@ class Data extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->_initScalarProperties($apiResponse, [
+        $data = $apiResponse->data;
+        $data->addChild('id',$apiResponse->id);
+        $this->_initScalarProperties($data, [
             'id',
             'gen_info',
             'hosting',
