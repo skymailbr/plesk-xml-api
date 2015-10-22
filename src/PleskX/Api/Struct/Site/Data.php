@@ -5,6 +5,10 @@ namespace PleskX\Api\Struct\Site;
 
 class Data extends \PleskX\Api\Struct
 {
+
+    /** @var integer **/
+    public $integer;
+
     /** @var PleskX\Api\Struct\Site\GeneralInfo **/
     public $genInfo;
 
@@ -23,6 +27,7 @@ class Data extends \PleskX\Api\Struct
     public function __construct($apiResponse)
     {
         $this->_initScalarProperties($apiResponse, [
+            'integer',
             'gen_info',
             'hosting',
             'stat',
