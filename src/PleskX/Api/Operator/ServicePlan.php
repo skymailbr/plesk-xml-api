@@ -22,4 +22,18 @@ class ServicePlan extends \PleskX\Api\Operator
         return new Struct\Info($response);
     }
 
+    public function getAll()
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('service-plan')->addChild('get');
+        $getTag->addChild('filter');
+        $getTag->addChild('owner-all');
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'service-plan'}->get->result;
+        $ret = [];
+        foreach ($response as $f) {
+            if ( isset( $f->id ) ) $ret[] = new Struct\Info($f);
+        }
+        return $ret;
+    }
+
 }

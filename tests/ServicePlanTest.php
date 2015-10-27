@@ -50,4 +50,10 @@ class ServicePlanTest extends TestCase
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
+    public function testGetAll()
+    {
+        $servicePlan = $this->_client->servicePlan()->getAll();
+        $this->assertGreaterThan(0, $servicePlan[0]->id);
+    }
+
 }
