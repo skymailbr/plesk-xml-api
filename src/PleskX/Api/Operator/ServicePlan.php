@@ -11,7 +11,7 @@ class ServicePlan extends \PleskX\Api\Operator
     /**
      * @param string $field
      * @param integer|string $value
-     * @return Struct\GeneralInfo
+     * @return Struct\Data
      */
     public function get($field, $value)
     {
@@ -19,9 +19,12 @@ class ServicePlan extends \PleskX\Api\Operator
         $getTag = $packet->addChild('service-plan')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'service-plan'}->get->result;
-        return new Struct\Info($response);
+        return new Struct\Data($response);
     }
 
+    /**
+     * @return array [Struct\Data]
+     */
     public function getAll()
     {
         $packet = $this->_client->getPacket();
@@ -31,7 +34,7 @@ class ServicePlan extends \PleskX\Api\Operator
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'service-plan'}->get->result;
         $ret = [];
         foreach ($response as $f) {
-            if ( isset( $f->id ) ) $ret[] = new Struct\Info($f);
+            if ( isset( $f->id ) ) $ret[] = new Struct\Data($f);
         }
         return $ret;
     }
