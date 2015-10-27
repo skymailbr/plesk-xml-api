@@ -10,21 +10,21 @@ class CustomerTest extends TestCase
         'passwd' => 'simple-password',
     ];
 
-    public function testCreate()
-    {
-        $customer = $this->_client->customer()->create($this->_customerProperties);
-        $this->assertInternalType('integer', $customer->id);
-        $this->assertGreaterThan(0, $customer->id);
+    // public function testCreate()
+    // {
+    //     $customer = $this->_client->customer()->create($this->_customerProperties);
+    //     $this->assertInternalType('integer', $customer->id);
+    //     $this->assertGreaterThan(0, $customer->id);
 
-        $this->_client->customer()->delete('id', $customer->id);
-    }
+    //     $this->_client->customer()->delete('id', $customer->id);
+    // }
 
-    public function testDelete()
-    {
-        $customer = $this->_client->customer()->create($this->_customerProperties);
-        $result = $this->_client->customer()->delete('id', $customer->id);
-        $this->assertTrue($result);
-    }
+    // public function testDelete()
+    // {
+    //     $customer = $this->_client->customer()->create($this->_customerProperties);
+    //     $result = $this->_client->customer()->delete('id', $customer->id);
+    //     $this->assertTrue($result);
+    // }
 
     public function testGet()
     {
@@ -32,6 +32,7 @@ class CustomerTest extends TestCase
         $customerInfo = $this->_client->customer()->get('id', $customer->id);
         $this->assertEquals('John Smith', $customerInfo->personalName);
         $this->assertEquals('john-unit-test', $customerInfo->login);
+        $this->assertEquals($customer->id, $customerInfo->id);
 
         $this->_client->customer()->delete('id', $customer->id);
     }

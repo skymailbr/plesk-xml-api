@@ -48,8 +48,8 @@ class Customer extends \PleskX\Api\Operator
         $getTag = $packet->addChild('customer')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $getTag->addChild('dataset')->addChild('gen_info');
-        $response = $this->_client->request($packet);
-        return new Struct\GeneralInfo($response->data->gen_info);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'customer'}->get->result;
+        return new Struct\GeneralInfo($response);
     }
 
 }
