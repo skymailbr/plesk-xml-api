@@ -56,6 +56,16 @@ class FtpUserTest extends TestCase
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
+    public function testSet()
+    {
+        $webspace = $this->_createWebspace();
+        $ftpuser = $this->_createFtpUser( $webspace );
+        $result = $this->_client->ftpuser()->set('id', $ftpuser->id, ['password' => 'kjklasdjlkaj']);
+        $this->assertGreaterThan(0, $result->id);
+        $this->_client->ftpuser()->delete('id', $ftpuser->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
     public function testDelete()
     {
         $webspace = $this->_createWebspace();

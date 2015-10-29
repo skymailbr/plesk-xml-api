@@ -24,6 +24,22 @@ class FtpUser extends \PleskX\Api\Operator
     }
 
     /**
+     * Change FTP account
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @param array $properties
+     * @return Struct\Info
+     */
+    public function set($field, $value, $properties)
+    {
+        $properties = ['ftp-user' => ['set' => ['filter' => [ $field => $value ], 'values' => $properties ]]];
+        $packet = $this->_client->genRequestXml($properties);
+        $response = $this->_client->request($packet);
+        return new Struct\Info($response);
+    }
+
+    /**
      * @param string $field
      * @param integer|string $value
      * @return bool

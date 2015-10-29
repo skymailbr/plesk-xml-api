@@ -52,6 +52,22 @@ class Webspace extends \PleskX\Api\Operator
 
 
     /**
+     * Change Webspace
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @param array $properties
+     * @return Struct\Info
+     */
+    public function set($field, $value, $properties)
+    {
+        $properties = ['webspace' => ['set' => ['filter' => [ $field => $value ], 'values' => $properties ]]];
+        $packet = $this->_client->genRequestXml($properties);
+        $response = $this->_client->request($packet);
+        return new Struct\Info($response);
+    }
+
+    /**
      * Get gen_info of webspace [name,guid]
      *
      * @param string $field
