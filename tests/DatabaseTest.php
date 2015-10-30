@@ -108,6 +108,17 @@ class DatabaseTest extends TestCase
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
+    public function testSetUser() {
+        $webspace = $this->_createWebspace();
+        $database = $this->_createDatabase( $webspace );
+        $user = $this->_createUser( $database );
+        $result = $this->_client->database()->setUser($user->id,['password'=>'daskljaskljdaskladj']);
+        $this->assertTrue($result);
+        $this->_client->database()->deleteUser('id', $user->id);
+        $this->_client->database()->delete('id', $database->id);
+        $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
     public function testDeleteUser() {
         $webspace = $this->_createWebspace();
         $database = $this->_createDatabase( $webspace );

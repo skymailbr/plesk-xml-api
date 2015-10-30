@@ -3,6 +3,4 @@
 
 namespace PleskX\Api\Struct\Database;
 
-class InfoUser extends Info {
-	
-}
+class InfoUser extends Info {}

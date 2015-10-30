@@ -78,6 +78,22 @@ class Database extends \PleskX\Api\Operator
     }
 
     /**
+     * Change database user
+     *
+     * @param integer $id The database user id
+     * @param array $properties
+     * @return Struct\InfoUser
+     */
+    public function setUser($id, $properties)
+    {
+        $properties = ['database' => ['set-db-user' => array_merge(['id' => $id], $properties)]];
+        $packet = $this->_client->genRequestXml($properties);
+        $response = $this->_client->request($packet);
+        return 'ok' === (string)$response->status;
+    }
+
+
+    /**
      * Delete Database user
      * @param string $field
      * @param integer|string $value
