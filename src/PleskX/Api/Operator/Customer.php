@@ -42,14 +42,24 @@ class Customer extends \PleskX\Api\Operator
      * @param integer|string $value
      * @return Struct\GeneralInfo
      */
-    public function get($field, $value)
+    public function get($field=null, $value=null)
     {
         $packet = $this->_client->getPacket();
         $getTag = $packet->addChild('customer')->addChild('get');
-        $getTag->addChild('filter')->addChild($field, $value);
+        $f = $getTag->addChild('filter');
+        if ($field) $f->addChild($field, $value);
         $getTag->addChild('dataset')->addChild('gen_info');
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'customer'}->get->result;
-        return new Struct\GeneralInfo($response);
+        if ($field)
+            return new Struct\GeneralInfo($response);
+        else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\GeneralInfo($f);
+            }
+            return $ret;            
+        }
     }
 
     /**

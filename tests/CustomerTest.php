@@ -43,4 +43,10 @@ class CustomerTest extends TestCase
         $this->assertGreaterThan(0, $domainList[0]->id);
     }
 
+    public function testGetAll()
+    {
+        $customerList = $this->_client->customer()->get();
+        $this->assertGreaterThan(0, $customerList[0]->id);
+    }
+
 }
