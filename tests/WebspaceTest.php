@@ -89,8 +89,7 @@ class WebspaceTest extends TestCase
     {
         $webspace = $this->_createWebspace();
         $webspaceInfo = $this->_client->webspace()->get('id', $webspace->id);
-        $this->assertEquals($webspace->id, $webspaceInfo->id);
-
+        $this->assertEquals($this->webspaceSiteName, $webspaceInfo->name);
         $this->_client->webspace()->delete('id', $webspace->id);
     }
 
@@ -108,6 +107,12 @@ class WebspaceTest extends TestCase
         $webspaceInfo = $this->_client->webspace()->getData('id', $webspace->id);
         $this->assertEquals($this->webspaceSiteName, $webspaceInfo->genInfo->name);
         $this->_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testDataAll()
+    {
+        $webspaceInfo = $this->_client->webspace()->getData();
+        $this->assertGreaterThan(0, $webspaceInfo[0]->id);
     }
 
     public function testGetTrafficThisMonth()

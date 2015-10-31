@@ -87,15 +87,16 @@ class Webspace extends \PleskX\Api\Operator
     /**
      * Get Data of webspace 
      *
-     * @param string $field
-     * @param integer|string $value
-     * @return Struct\Data
+     * @param string $field optional
+     * @param integer|string $value optional
+     * @return mixed Struct\Data|Array
      */
-    public function getData($field, $value)
+    public function getData($field=null,$value=null)
     {
         $packet = $this->_client->getPacket();
         $getTag = $packet->addChild('webspace')->addChild('get');
-        $getTag->addChild('filter')->addChild($field, $value);
+        $g = $getTag->addChild('filter');
+        if ($field) $g->addChild($field, $value);
         $dataset = $getTag->addChild('dataset');
         $dataset->addChild('gen_info');
         $dataset->addChild('hosting');
@@ -105,8 +106,18 @@ class Webspace extends \PleskX\Api\Operator
         $dataset->addChild('disk_usage');
         $dataset->addChild('performance');
         $dataset->addChild('subscriptions');
-        $response = $this->_client->request($packet);
-        return new Struct\Data($response);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'webspace'}->{'get'}->result;
+        $ret = NULL;
+        if ( in_array($field,['id','name']) && isset( $response->id ) ) {
+            $ret = new Struct\Data($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\Data($f);
+            }
+        }
+        return $ret;
     }
 
     /**
