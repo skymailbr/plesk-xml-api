@@ -10,21 +10,21 @@ class CustomerTest extends TestCase
         'passwd' => 'simple-password',
     ];
 
-    // public function testCreate()
-    // {
-    //     $customer = $this->_client->customer()->create($this->_customerProperties);
-    //     $this->assertInternalType('integer', $customer->id);
-    //     $this->assertGreaterThan(0, $customer->id);
+    public function testCreate()
+    {
+        $customer = $this->_client->customer()->create($this->_customerProperties);
+        $this->assertInternalType('integer', $customer->id);
+        $this->assertGreaterThan(0, $customer->id);
 
-    //     $this->_client->customer()->delete('id', $customer->id);
-    // }
+        $this->_client->customer()->delete('id', $customer->id);
+    }
 
-    // public function testDelete()
-    // {
-    //     $customer = $this->_client->customer()->create($this->_customerProperties);
-    //     $result = $this->_client->customer()->delete('id', $customer->id);
-    //     $this->assertTrue($result);
-    // }
+    public function testDelete()
+    {
+        $customer = $this->_client->customer()->create($this->_customerProperties);
+        $result = $this->_client->customer()->delete('id', $customer->id);
+        $this->assertTrue($result);
+    }
 
     public function testGet()
     {
@@ -35,6 +35,12 @@ class CustomerTest extends TestCase
         $this->assertEquals($customer->id, $customerInfo->id);
 
         $this->_client->customer()->delete('id', $customer->id);
+    }
+
+    public function testGetDomainList()
+    {
+        $domainList = $this->_client->customer()->getDomainList('login', 1);
+        $this->assertGreaterThan(0, $domainList[0]->id);
     }
 
 }

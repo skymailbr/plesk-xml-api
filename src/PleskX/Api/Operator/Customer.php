@@ -52,4 +52,23 @@ class Customer extends \PleskX\Api\Operator
         return new Struct\GeneralInfo($response);
     }
 
+    /**
+     * @param string $field
+     * @param integer|string $value
+     * @return array[Struct\Domain]
+     */
+    public function getDomainList($field, $value)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild('customer')->addChild('get-domain-list');
+        $getTag->addChild('filter')->addChild($field, $value);
+        $response = $this->_client->request($packet)->domains->domain;
+        $ret = [];
+        foreach ($response as $f) {
+            if ( isset( $f->id ) ) 
+                $ret[] = new Struct\Domain($f);
+        }
+        return $ret;
+    }
+
 }
