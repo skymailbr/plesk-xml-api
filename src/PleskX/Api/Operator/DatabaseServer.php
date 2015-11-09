@@ -3,6 +3,8 @@
 
 namespace PleskX\Api\Operator;
 
+use PleskX\Api\Struct\DatabaseServer as Struct;
+
 class DatabaseServer extends \PleskX\Api\Operator
 {
 
@@ -15,6 +17,34 @@ class DatabaseServer extends \PleskX\Api\Operator
     {
         $response = $this->request('get-supported-types');
         return (array)$response->type;
+    }
+
+
+    /**
+     * Get database
+     *
+     * @param string $field
+     * @param integer|string $value
+     * @return mixed Struct\GeneralInfo|Array
+     */
+    public function get($field = null, $value = null)
+    {
+        $packet = $this->_client->getPacket();
+        $getTag = $packet->addChild($this->_wrapperTag)->addChild('get');
+        $filter = $getTag->addChild('filter');
+        if ($field && $value) $filteri->addChild($field, $value);
+        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{$this->_wrapperTag}->{'get'}->result;
+        $ret = NULL;
+        if ( $field == 'id' && isset( $response->id ) ) {
+            $ret = new Struct\GeneralInfo($response);
+        } else {
+            $ret = [];
+            foreach ($response as $f) {
+                if ( isset( $f->id ) ) 
+                    $ret[] = new Struct\GeneralInfo($f);
+            }
+        }
+        return $ret;
     }
 
 }

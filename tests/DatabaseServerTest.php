@@ -11,4 +11,11 @@ class DatabaseServerTest extends TestCase
         $this->assertContains('mysql', $types);
     }
 
+
+    public function testGet()
+    {
+        $servers = $this->_client->databaseServer()->get();
+        $this->assertGreaterThan(0, $servers[0]->id);
+    }
+
 }
