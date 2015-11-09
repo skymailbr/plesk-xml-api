@@ -32,7 +32,7 @@ class DatabaseServer extends \PleskX\Api\Operator
         $packet = $this->_client->getPacket();
         $getTag = $packet->addChild($this->_wrapperTag)->addChild('get');
         $filter = $getTag->addChild('filter');
-        if ($field && $value) $filteri->addChild($field, $value);
+        if ($field && $value) $filter->addChild($field, $value);
         $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{$this->_wrapperTag}->{'get'}->result;
         $ret = NULL;
         if ( $field == 'id' && isset( $response->id ) ) {
