@@ -24,7 +24,7 @@ class GeneralInfo extends \PleskX\Api\Struct
     {
         $this->id = $apiResponse->id;
         $this->_initScalarProperties($apiResponse->info, [
-            ['prefs' => 'preferences'],
+            ['pref' => 'preferences'],
             ['site-id' => 'siteId'],
             'name',
             ['ascii-name' => 'asciiName']
