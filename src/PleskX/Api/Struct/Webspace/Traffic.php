@@ -45,7 +45,7 @@ class Traffic extends \PleskX\Api\Struct
             $this->httpIn += $traffic->http_in;
             $this->httpOut += $traffic->http_out;
             $this->ftpIn += $traffic->ftp_in;
-            $this->ftpOUt += $traffic->ftp_out;
+            $this->ftpOut += $traffic->ftp_out;
         }
     }
 
