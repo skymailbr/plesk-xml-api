@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\Locale as Struct;
 
 class Locale extends \PleskX\Api\Operator
@@ -14,14 +16,14 @@ class Locale extends \PleskX\Api\Operator
     public function get($id = null)
     {
         $locales = [];
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $filter = $packet->addChild('locale')->addChild('get')->addChild('filter');
 
         if (!is_null($id)) {
             $filter->addChild('id', $id);
         }
 
-        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL);
+        $response = $this->client->request($packet, \PleskX\Api\Client::RESPONSE_FULL);
 
         foreach ($response->locale->get->result as $localeInfo) {
             $locales[(string)$localeInfo->info->id] = new Struct\Info($localeInfo->info);
@@ -29,5 +31,4 @@ class Locale extends \PleskX\Api\Operator
 
         return !is_null($id) ? reset($locales) : $locales;
     }
-
 }

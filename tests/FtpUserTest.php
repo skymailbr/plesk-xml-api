@@ -1,18 +1,21 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class FtpUserTest extends TestCase
 {
 
     private $webspaceSiteName = 'example-test-parent.dom';
 
-    private function _createWebspace()
+    private function createWebspace()
     {
 
-        $ips = $this->_client->ip()->get();
+        $ips = $this->client->ip()->get();
         $ipInfo = reset($ips);
 
-        return $this->_client->webspace()->create([
+        return $this->client->webspace()->create([
             'gen_setup' => [
                 'name' => $this->webspaceSiteName,
                 'ip_address' => $ipInfo->ipAddress,
@@ -33,13 +36,12 @@ class FtpUserTest extends TestCase
             ],
             'plan-name' => 'basic'
         ]);
-
     }
 
 
-    private function _createFtpUser( $webspace, $name = 'newftpuser' )
+    private function createFtpUser($webspace, $name = 'newftpuser')
     {
-        return $this->_client->ftpUser()->create([
+        return $this->client->ftpUser()->create([
             'name' => $name,
             'password' => 'userpassword',
             'home' => '',
@@ -49,56 +51,54 @@ class FtpUserTest extends TestCase
 
     public function testCreate()
     {
-        $webspace = $this->_createWebspace();
-        $ftpuser = $this->_createFtpUser( $webspace );
+        $webspace = $this->createWebspace();
+        $ftpuser = $this->createFtpUser($webspace);
         $this->assertGreaterThan(0, $ftpuser->id);
-        $this->_client->ftpuser()->delete('id', $ftpuser->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->ftpuser()->delete('id', $ftpuser->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testSet()
     {
-        $webspace = $this->_createWebspace();
-        $ftpuser = $this->_createFtpUser( $webspace );
-        $result = $this->_client->ftpuser()->set('id', $ftpuser->id, ['password' => 'kjklasdjlkaj']);
+        $webspace = $this->createWebspace();
+        $ftpuser = $this->createFtpUser($webspace);
+        $result = $this->client->ftpuser()->set('id', $ftpuser->id, ['password' => 'kjklasdjlkaj']);
         $this->assertGreaterThan(0, $result->id);
-        $this->_client->ftpuser()->delete('id', $ftpuser->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->ftpuser()->delete('id', $ftpuser->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testDelete()
     {
-        $webspace = $this->_createWebspace();
-        $ftpuser = $this->_createFtpUser( $webspace );
-        $result = $this->_client->ftpuser()->delete('id', $ftpuser->id);
+        $webspace = $this->createWebspace();
+        $ftpuser = $this->createFtpUser($webspace);
+        $result = $this->client->ftpuser()->delete('id', $ftpuser->id);
         $this->assertTrue($result);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testGet()
     {
-        $webspace = $this->_createWebspace();
-        $ftpuser = $this->_createFtpUser( $webspace );
-        $ftpUserInfo = $this->_client->ftpUser()->get('id', $ftpuser->id);
+        $webspace = $this->createWebspace();
+        $ftpuser = $this->createFtpUser($webspace);
+        $ftpUserInfo = $this->client->ftpUser()->get('id', $ftpuser->id);
         $this->assertGreaterThan(0, $ftpUserInfo->id);
-        $this->_client->ftpuser()->delete('id', $ftpuser->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->ftpuser()->delete('id', $ftpuser->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testGetAllWebspace()
     {
-        $webspace = $this->_createWebspace();
-        $ftpuser1 = $this->_createFtpUser( $webspace );
-        $ftpuser2 = $this->_createFtpUser( $webspace, 'ftpuser22' );
+        $webspace = $this->createWebspace();
+        $ftpuser1 = $this->createFtpUser($webspace);
+        $ftpuser2 = $this->createFtpUser($webspace, 'ftpuser22');
 
-        $ftpUserInfo = $this->_client->ftpUser()->get('webspace-id', $webspace->id);
+        $ftpUserInfo = $this->client->ftpUser()->get('webspace-id', $webspace->id);
         $this->assertGreaterThan(0, $ftpUserInfo[0]->id);
         $this->assertGreaterThan(0, $ftpUserInfo[1]->id);
 
-        $this->_client->ftpuser()->delete('id', $ftpuser1->id);
-        $this->_client->ftpuser()->delete('id', $ftpuser2->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->ftpuser()->delete('id', $ftpuser1->id);
+        $this->client->ftpuser()->delete('id', $ftpuser2->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
-
-
 }

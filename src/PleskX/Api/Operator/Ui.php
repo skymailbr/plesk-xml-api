@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\Ui as Struct;
 
 class Ui extends \PleskX\Api\Operator
@@ -23,7 +25,7 @@ class Ui extends \PleskX\Api\Operator
      */
     public function createCustomButton($owner, $properties)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $buttonNode = $packet->addChild('ui')->addChild('create-custombutton');
         $buttonNode->addChild('owner')->addChild($owner);
         $propertiesNode = $buttonNode->addChild('properties');
@@ -32,7 +34,7 @@ class Ui extends \PleskX\Api\Operator
             $propertiesNode->addChild($name, $value);
         }
 
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return (int)$response->id;
     }
 
@@ -55,5 +57,4 @@ class Ui extends \PleskX\Api\Operator
         $response = $this->request("delete-custombutton.filter.custombutton-id=$id");
         return 'ok' === (string)$response->status;
     }
-
 }

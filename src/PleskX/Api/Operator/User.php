@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\User as Struct;
 
 class User extends \PleskX\Api\Operator
@@ -14,7 +16,7 @@ class User extends \PleskX\Api\Operator
      */
     public function create($role, $properties)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $addNode = $packet->addChild('user')->addChild('add');
         $info = $addNode->addChild('gen-info');
 
@@ -24,7 +26,7 @@ class User extends \PleskX\Api\Operator
 
         $addNode->addChild('roles')->addChild('name', $role);
 
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -35,9 +37,9 @@ class User extends \PleskX\Api\Operator
      */
     public function delete($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('user')->addChild('del')->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return 'ok' === (string)$response->status;
     }
 
@@ -48,12 +50,11 @@ class User extends \PleskX\Api\Operator
      */
     public function get($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('user')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $getTag->addChild('dataset')->addChild('gen-info');
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return new Struct\GeneralInfo($response->data->{'gen-info'});
     }
-
 }

@@ -1,35 +1,41 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class ServerTest extends TestCase
 {
 
     public function testGetProtos()
     {
-        $protos = $this->_client->server()->getProtos();
-        $this->assertInternalType('array', $protos);
+        $protos = $this->client->server()->getProtos();
+        $this->assertIsArray($protos);
         $this->assertContains('1.6.3.0', $protos);
     }
 
     public function testGetGenInfo()
     {
-        $generalInfo = $this->_client->server()->getGeneralInfo();
+        $generalInfo = $this->client->server()->getGeneralInfo();
         $this->assertGreaterThan(0, strlen($generalInfo->serverName));
-        $this->assertRegExp('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $generalInfo->serverGuid);
+        $this->assertRegExp(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+            $generalInfo->serverGuid
+        );
         $this->assertEquals('standard', $generalInfo->mode);
     }
 
     public function testGetPreferences()
     {
-        $preferences = $this->_client->server()->getPreferences();
-        $this->assertInternalType('integer', $preferences->statTtl);
+        $preferences = $this->client->server()->getPreferences();
+        $this->assertIsInt($preferences->statTtl);
         $this->assertGreaterThan(0, $preferences->statTtl);
         $this->assertEquals(0, $preferences->restartApacheInterval);
     }
 
     public function testGetAdmin()
     {
-        $admin = $this->_client->server()->getAdmin();
+        $admin = $this->client->server()->getAdmin();
         $this->assertGreaterThan(0, strlen($admin->companyName));
         $this->assertGreaterThan(0, strlen($admin->name));
         $this->assertContains('@', $admin->email);
@@ -37,8 +43,8 @@ class ServerTest extends TestCase
 
     public function testGetKeyInfo()
     {
-        $keyInfo = $this->_client->server()->getKeyInfo();
-        $this->assertInternalType('array', $keyInfo);
+        $keyInfo = $this->client->server()->getKeyInfo();
+        $this->assertIsArray($keyInfo);
         $this->assertGreaterThan(0, count($keyInfo));
         $this->assertArrayHasKey('plesk_key_id', $keyInfo);
         $this->assertArrayHasKey('product_version', $keyInfo);
@@ -46,8 +52,8 @@ class ServerTest extends TestCase
 
     public function testGetComponents()
     {
-        $components = $this->_client->server()->getComponents();
-        $this->assertInternalType('array', $components);
+        $components = $this->client->server()->getComponents();
+        $this->assertIsArray($components);
         $this->assertGreaterThan(0, count($components));
         $this->assertArrayHasKey('psa', $components);
         $this->assertArrayHasKey('php', $components);
@@ -55,13 +61,13 @@ class ServerTest extends TestCase
 
     public function testGetServiceStates()
     {
-        $serviceStates = $this->_client->server()->getServiceStates();
-        $this->assertInternalType('array', $serviceStates);
+        $serviceStates = $this->client->server()->getServiceStates();
+        $this->assertIsArray($serviceStates);
         $this->assertGreaterThan(0, count($serviceStates));
         $this->assertArrayHasKey('web', $serviceStates);
 
         $webService = $serviceStates['web'];
-        $this->assertInternalType('array', $webService);
+        $this->assertIsArray($webService);
         $this->assertArrayHasKey('id', $webService);
         $this->assertArrayHasKey('title', $webService);
         $this->assertArrayHasKey('state', $webService);
@@ -70,15 +76,15 @@ class ServerTest extends TestCase
 
     public function testGetSessionPreferences()
     {
-        $preferences = $this->_client->server()->getSessionPreferences();
-        $this->assertInternalType('integer', $preferences->loginTimeout);
+        $preferences = $this->client->server()->getSessionPreferences();
+        $this->assertIsInt($preferences->loginTimeout);
         $this->assertGreaterThan(0, $preferences->loginTimeout);
     }
 
     public function testGetShells()
     {
-        $shells = $this->_client->server()->getShells();
-        $this->assertInternalType('array', $shells);
+        $shells = $this->client->server()->getShells();
+        $this->assertIsArray($shells);
         $this->assertGreaterThan(0, count($shells));
         $this->assertArrayHasKey('/bin/bash', $shells);
 
@@ -88,30 +94,29 @@ class ServerTest extends TestCase
 
     public function testGetNetworkInterfaces()
     {
-        $netInterfaces = $this->_client->server()->getNetworkInterfaces();
-        $this->assertInternalType('array', $netInterfaces);
+        $netInterfaces = $this->client->server()->getNetworkInterfaces();
+        $this->assertIsArray($netInterfaces);
         $this->assertGreaterThan(0, count($netInterfaces));
     }
 
     public function testGetStatistics()
     {
-        $stats = $this->_client->server()->getStatistics();
-        $this->assertInternalType('integer', $stats->objects->clients);
+        $stats = $this->client->server()->getStatistics();
+        $this->assertIsInt($stats->objects->clients);
         $this->assertEquals('psa', $stats->version->internalName);
     }
 
     public function testGetSiteIsolationConfig()
     {
-        $config = $this->_client->server()->getSiteIsolationConfig();
-        $this->assertInternalType('array', $config);
+        $config = $this->client->server()->getSiteIsolationConfig();
+        $this->assertIsArray($config);
         $this->assertGreaterThan(0, count($config));
         $this->assertArrayHasKey('php', $config);
     }
 
     public function testGetUpdatesInfo()
     {
-        $updatesInfo = $this->_client->server()->getUpdatesInfo();
+        $updatesInfo = $this->client->server()->getUpdatesInfo();
         $this->assertInternalType('boolean', $updatesInfo->installUpdatesAutomatically);
     }
-
 }

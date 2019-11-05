@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api;
@@ -18,7 +19,7 @@ abstract class Struct
      * @param array $properties
      * @throws \Exception
      */
-    protected function _initScalarProperties($apiResponse, array $properties)
+    protected function initScalarProperties($apiResponse, array $properties)
     {
 
         foreach ($properties as $property) {
@@ -26,7 +27,7 @@ abstract class Struct
                 $classPropertyName = current($property);
                 $value = $apiResponse->{key($property)};
             } else {
-                $classPropertyName = $this->_underToCamel($property);
+                $classPropertyName = $this->underToCamel($property);
                 $value = $apiResponse->$property;
             }
 
@@ -41,9 +42,11 @@ abstract class Struct
             } else if ('boolean' == $propertyType) {
                 $value = in_array((string)$value, ['true', 'on', 'enabled']);
             } else {
-                if ( class_exists($propertyType) ) $value = new $propertyType($value);
-                else
+                if (class_exists($propertyType)) {
+                    $value = new $propertyType($value);
+                } else {
                     throw new \Exception("Unknown property type '$propertyType'.");
+                }
             }
 
             $this->$classPropertyName = $value;
@@ -56,10 +59,9 @@ abstract class Struct
      * @param string $under
      * @return string
      */
-    protected function _underToCamel($under)
+    protected function underToCamel($under)
     {
         $under = '_' . str_replace(['_','-'], ' ', strtolower($under));
         return ltrim(str_replace(' ', '', ucwords($under)), '_');
     }
-
 }

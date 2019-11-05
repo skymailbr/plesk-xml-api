@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
@@ -18,8 +19,8 @@ class FtpUser extends \PleskX\Api\Operator
     public function create($properties)
     {
         $properties = ['ftp-user' => ['add' => $properties]];
-        $packet = $this->_client->genRequestXml($properties);
-        $response = $this->_client->request($packet);
+        $packet = $this->client->genRequestXml($properties);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -34,8 +35,8 @@ class FtpUser extends \PleskX\Api\Operator
     public function set($field, $value, $properties)
     {
         $properties = ['ftp-user' => ['set' => ['filter' => [ $field => $value ], 'values' => $properties ]]];
-        $packet = $this->_client->genRequestXml($properties);
-        $response = $this->_client->request($packet);
+        $packet = $this->client->genRequestXml($properties);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -46,9 +47,9 @@ class FtpUser extends \PleskX\Api\Operator
      */
     public function delete($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('ftp-user')->addChild('del')->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return 'ok' === (string)$response->status;
     }
 
@@ -61,21 +62,21 @@ class FtpUser extends \PleskX\Api\Operator
      */
     public function get($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('ftp-user')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'ftp-user'}->get->result;
-        $ret = NULL;
-        if ( $field == 'id' && isset( $response->id ) ) {
+        $response = $this->client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'ftp-user'}->get->result;
+        $ret = null;
+        if ($field == 'id' && isset($response->id)) {
             $ret = new Struct\GeneralInfo($response);
         } else {
             $ret = [];
             foreach ($response as $f) {
-                if ( isset( $f->id ) ) 
+                if (isset($f->id)) {
                     $ret[] = new Struct\GeneralInfo($f);
+                }
             }
         }
         return $ret;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Struct\SecretKey;
@@ -19,7 +20,7 @@ class KeyInfo extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->_initScalarProperties($apiResponse, [
+        $this->initScalarProperties($apiResponse, [
             'key',
             'ip_address',
             'description',

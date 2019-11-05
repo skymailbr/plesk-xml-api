@@ -1,20 +1,24 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
-abstract class TestCase extends PHPUnit_Framework_TestCase
+namespace Tests;
+
+use PleskX\Api\Client as PleskClient;
+
+abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
 
-    /** @var PleskX\Api\Client */
-    protected $_client;
+    /** @var PleskClient */
+    protected $client;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $host = getenv('REMOTE_HOST');
         $login = getenv('REMOTE_LOGIN');
         $password = getenv('REMOTE_PASSWORD');
 
-        $this->_client = new PleskX\Api\Client($host);
-        $this->_client->setCredentials($login, $password);
+        $this->client = new PleskClient($host);
+        $this->client->setCredentials($login, $password);
     }
-
 }

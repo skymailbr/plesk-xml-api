@@ -1,13 +1,16 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class SessionTest extends TestCase
 {
 
     public function testGet()
     {
-        $sessionId = $this->_client->server()->createSession('admin', '127.0.0.1');
-        $sessions = $this->_client->session()->get();
+        $sessionId = $this->client->server()->createSession('admin', '127.0.0.1');
+        $sessions = $this->client->session()->get();
         $this->assertArrayHasKey($sessionId, $sessions);
 
         $sessionInfo = $sessions[$sessionId];
@@ -18,10 +21,9 @@ class SessionTest extends TestCase
 
     public function testTerminate()
     {
-        $sessionId = $this->_client->server()->createSession('admin', '127.0.0.1');
-        $this->_client->session()->terminate($sessionId);
-        $sessions = $this->_client->session()->get();
+        $sessionId = $this->client->server()->createSession('admin', '127.0.0.1');
+        $this->client->session()->terminate($sessionId);
+        $sessions = $this->client->session()->get();
         $this->assertArrayNotHasKey($sessionId, $sessions);
     }
-
 }

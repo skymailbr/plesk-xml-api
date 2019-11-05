@@ -1,12 +1,15 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class EventLogTest extends TestCase
 {
 
     public function testGet()
     {
-        $events = $this->_client->eventLog()->get();
+        $events = $this->client->eventLog()->get();
         $this->assertGreaterThan(0, $events);
 
         $event = reset($events);
@@ -15,7 +18,7 @@ class EventLogTest extends TestCase
 
     public function testGetDetailedLog()
     {
-        $events = $this->_client->eventLog()->getDetailedLog();
+        $events = $this->client->eventLog()->getDetailedLog();
         $this->assertGreaterThan(0, $events);
 
         $event = reset($events);
@@ -25,8 +28,7 @@ class EventLogTest extends TestCase
 
     public function testGetLastId()
     {
-        $lastId = $this->_client->eventLog()->getLastId();
+        $lastId = $this->client->eventLog()->getLastId();
         $this->assertGreaterThan(0, $lastId);
     }
-
 }

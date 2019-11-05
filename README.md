@@ -1,20 +1,34 @@
-## PHP library for Plesk API-RPC
+# PHP library for Plesk API-RPC
 
-PHP object-oriented library for Plesk API-RPC.
+PHP 7 library for Plesk API-RPC.
 
 ## Install Via Composer
 
 [Composer](https://getcomposer.org/) is a preferable way to install the library:
 
-`composer require lucasmarin/api-php-lib:@dev-master`
+````bash
+composer require skymailbr/plesk-xml-api:@master
+````
 
 ## How to Run Unit Tests
 
 One the possible ways to become familiar with the library is to check the unit tests.
 
-To run the unit tests use the following command:
+__Attention!!! The test suit uses a real instance of plesk to create subscriptions/sites/resellers and etc.__
 
-`REMOTE_HOST=your-plesk-host.dom REMOTE_PASSWORD=password REMOTE_LOGIN=login phpunit`
+### Create .env file by .env-dist reference
+
+````bash
+cp .env-dist .env
+````
+
+Complete environment varivable values on .env file
+
+### Run phpunit 
+
+````bash
+php vendor/bin/phpunit
+````
 
 ## Using Grunt for Continuous Testing
 

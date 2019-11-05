@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
@@ -15,24 +16,24 @@ class Site extends \PleskX\Api\Operator
      */
     public function get($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('site')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $getTag->addChild('dataset')->addChild('gen_info');
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return new Struct\GeneralInfo($response->data->gen_info);
     }
 
     /**
-     * Get Data of site 
+     * Get Data of site
      *
      * @param string $field
      * @param integer|string $value
-     * @return mixed Array|Struct\Data 
+     * @return mixed Array|Struct\Data
      */
     public function getData($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('site')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $dataset = $getTag->addChild('dataset');
@@ -41,14 +42,16 @@ class Site extends \PleskX\Api\Operator
         $dataset->addChild('stat');
         $dataset->addChild('prefs');
         $dataset->addChild('disk_usage');
-        $ret = NULL;
-        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'site'}->{'get'}->result;
-        if ( in_array($field,['id','name','guid']) && isset( $response->id ) ) {
+        $ret = null;
+        $response = $this->client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'site'}->{'get'}->result;
+        if (in_array($field, ['id', 'name', 'guid']) && isset($response->id)) {
             $ret = new Struct\Data($response);
         } else {
             $ret = [];
             foreach ($response as $f) {
-                if ( isset( $f->id ) ) $ret[] = new Struct\Data($f);
+                if (isset($f->id)) {
+                    $ret[] = new Struct\Data($f);
+                }
             }
         }
         return $ret;
@@ -61,8 +64,8 @@ class Site extends \PleskX\Api\Operator
     public function create($properties)
     {
         $properties = ['site' => ['add' => $properties]];
-        $packet = $this->_client->genRequestXml( $properties );
-        $response = $this->_client->request($packet);
+        $packet = $this->client->genRequestXml($properties);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -73,10 +76,9 @@ class Site extends \PleskX\Api\Operator
      */
     public function delete($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('site')->addChild('del')->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return 'ok' === (string)$response->status;
     }
-
 }

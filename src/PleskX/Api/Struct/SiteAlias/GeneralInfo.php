@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Struct\SiteAlias;
@@ -7,23 +8,18 @@ class GeneralInfo extends \PleskX\Api\Struct
 {
     /** @var PleskX\Api\Struct\SiteAlias\Preferences **/
     public $preferences;
-
-    /** @var integer **/
+    /** @var integer * */
     public $siteId;
-
-    /** @var string **/
+    /** @var string * */
     public $name;
-
-    /** @var integer **/
+    /** @var integer * */
     public $id;
-
-    /** @var string **/
+    /** @var string * */
     public $asciiName;
-
     public function __construct($apiResponse)
     {
         $this->id = $apiResponse->id;
-        $this->_initScalarProperties($apiResponse->info, [
+        $this->initScalarProperties($apiResponse->info, [
             ['pref' => 'preferences'],
             ['site-id' => 'siteId'],
             'name',

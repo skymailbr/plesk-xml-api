@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\Session as Struct;
 
 class Session extends \PleskX\Api\Operator
@@ -31,5 +33,4 @@ class Session extends \PleskX\Api\Operator
         $response = $this->request("terminate.session-id=$sessionId");
         return 'ok' === (string)$response->status;
     }
-
 }

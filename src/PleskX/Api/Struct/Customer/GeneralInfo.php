@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Struct\Customer;
@@ -16,8 +17,8 @@ class GeneralInfo extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->id = (integer) $apiResponse->id;
-        $this->_initScalarProperties($apiResponse->data->gen_info, [
+        $this->id = (int)$apiResponse->id;
+        $this->initScalarProperties($apiResponse->data->gen_info, [
             ['pname' => 'personalName'],
             'login'
         ]);

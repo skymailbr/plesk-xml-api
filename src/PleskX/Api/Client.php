@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api;
+
 use SimpleXMLElement;
 
 /**
@@ -93,7 +95,8 @@ class Client
      * @param SimpleXMLElement $xmlData
      * @return SimpleXMLElement
      */
-    protected function _createXml( $data, &$xmlData ) {
+    protected function createXml($data, &$xmlData)
+    {
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 if (is_numeric($key)) {
@@ -101,19 +104,21 @@ class Client
                     $subnode = $xmlData->addChild($key);
                     foreach ($value[$key] as $k => $v) {
                         if (is_array($v)) {
-                            $this->_createXml($v, $subnode);
+                            $this->createXml($v, $subnode);
                         } else {
-                            $subnode->addChild("$k",htmlspecialchars("$v"));
+                            $subnode->addChild("$k", htmlspecialchars("$v"));
                         }
                     }
                 } else {
                     $subnode = $xmlData->addChild($key);
-                    $this->_createXml($value, $subnode);
+                    $this->createXml($value, $subnode);
                 }
             } else {
-                $xmlData->addChild("$key",htmlspecialchars("$value"));
+                $xmlData->addChild("$key", htmlspecialchars("$value"));
             }
         }
+
+        return $xmlData;
     }
 
     /**
@@ -126,7 +131,7 @@ class Client
     public function genRequestXml($attributes, $version = null)
     {
         $res = $this->getPacket($version);
-        $this->_createXml($attributes,$res);
+        $this->createXml($attributes, $res);
         return $res;
     }
 
@@ -136,6 +141,7 @@ class Client
      * @param string|array|SimpleXMLElement $request
      * @param int $mode
      * @return XmlResponse
+     * @throws \Exception
      */
     public function request($request, $mode = self::RESPONSE_SHORT)
     {
@@ -145,13 +151,15 @@ class Client
             $xml = $this->getPacket();
 
             if (is_array($request)) {
-                $request = $this->_arrayToXml($request, $xml)->asXML();
-            } else if (preg_match('/^[a-z]/', $request)) {
-                $request = $this->_expandRequestShortSyntax($request, $xml);
+                $request = $this->arrayToXml($request, $xml)->asXML();
+            } else {
+                if (preg_match('/^[a-z]/', $request)) {
+                    $request = $this->expandRequestShortSyntax($request, $xml);
+                }
             }
         }
 
-        $xml = $this->_performHttpRequest($request);
+        $xml = $this->performHttpRequest($request);
 
         return (self::RESPONSE_FULL == $mode) ? $xml : $xml->xpath('//result')[0];
     }
@@ -161,9 +169,9 @@ class Client
      *
      * @param string $request
      * @return XmlResponse
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function _performHttpRequest($request)
+    protected function performHttpRequest($request)
     {
         $curl = curl_init();
 
@@ -172,7 +180,7 @@ class Client
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->_getHeaders());
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->getHeaders());
         curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
 
         $result = curl_exec($curl);
@@ -192,7 +200,7 @@ class Client
         curl_close($curl);
 
         $xml = new XmlResponse($result);
-        $this->_verifyResponse($xml);
+        $this->verifyResponse($xml);
 
         return $xml;
     }
@@ -214,15 +222,17 @@ class Client
                 // TODO: implement
             } else {
                 if (is_array($request)) {
-                    $request = $this->_arrayToXml($request, $requestXml)->asXML();
-                } else if (preg_match('/^[a-z]/', $request)) {
-                    $this->_expandRequestShortSyntax($request, $requestXml);
+                    $request = $this->arrayToXml($request, $requestXml)->asXML();
+                } else {
+                    if (preg_match('/^[a-z]/', $request)) {
+                        $this->expandRequestShortSyntax($request, $requestXml);
+                    }
                 }
             }
             $responses[] = $this->request($request);
         }
 
-        $responseXml = $this->_performHttpRequest($requestXml->asXML());
+        $responseXml = $this->performHttpRequest($requestXml->asXML());
 
         $responses = [];
         foreach ($responseXml->children() as $childNode) {
@@ -245,7 +255,7 @@ class Client
      *
      * @return array
      */
-    protected function _getHeaders()
+    protected function getHeaders()
     {
         $headers = array(
             "Content-Type: text/xml",
@@ -288,7 +298,7 @@ class Client
      * @param XmlResponse $xml
      * @throws \Exception
      */
-    protected function _verifyResponse($xml)
+    protected function verifyResponse($xml)
     {
         if ($xml->system && $xml->system->status && 'error' == (string)$xml->system->status) {
             throw new Exception((string)$xml->system->errtext, (int)$xml->system->errcode);
@@ -308,7 +318,7 @@ class Client
      * @param SimpleXMLElement $xml
      * @return string
      */
-    protected function _expandRequestShortSyntax($request, SimpleXMLElement $xml)
+    protected function expandRequestShortSyntax($request, SimpleXMLElement $xml)
     {
         $parts = explode('.', $request);
         $node = $xml;
@@ -328,11 +338,11 @@ class Client
      * @param SimpleXMLElement $xml
      * @return SimpleXMLElement
      */
-    protected function _arrayToXml(array $array, SimpleXMLElement $xml)
+    protected function arrayToXml(array $array, SimpleXMLElement $xml)
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $this->_arrayToXml($value, $xml->addChild($key));
+                $this->arrayToXml($value, $xml->addChild($key));
             } else {
                 $xml->addChild($key, $value);
             }
@@ -345,7 +355,7 @@ class Client
      * @param string $name
      * @return \PleskX\Api\Operator
      */
-    protected function _getOperator($name)
+    protected function getOperator($name)
     {
         if (!isset($this->_operatorsCache[$name])) {
             $className = '\\PleskX\\Api\\Operator\\' . $name;
@@ -360,7 +370,7 @@ class Client
      */
     public function server()
     {
-        return $this->_getOperator('Server');
+        return $this->getOperator('Server');
     }
 
     /**
@@ -368,7 +378,7 @@ class Client
      */
     public function customer()
     {
-        return $this->_getOperator('Customer');
+        return $this->getOperator('Customer');
     }
 
     /**
@@ -376,7 +386,7 @@ class Client
      */
     public function webspace()
     {
-        return $this->_getOperator('Webspace');
+        return $this->getOperator('Webspace');
     }
 
     /**
@@ -384,7 +394,7 @@ class Client
      */
     public function subdomain()
     {
-        return $this->_getOperator('Subdomain');
+        return $this->getOperator('Subdomain');
     }
 
     /**
@@ -392,7 +402,7 @@ class Client
      */
     public function dns()
     {
-        return $this->_getOperator('Dns');
+        return $this->getOperator('Dns');
     }
 
     /**
@@ -400,7 +410,7 @@ class Client
      */
     public function databaseServer()
     {
-        return $this->_getOperator('DatabaseServer');
+        return $this->getOperator('DatabaseServer');
     }
 
     /**
@@ -408,7 +418,7 @@ class Client
      */
     public function mail()
     {
-        return $this->_getOperator('Mail');
+        return $this->getOperator('Mail');
     }
 
     /**
@@ -416,7 +426,7 @@ class Client
      */
     public function migration()
     {
-        return $this->_getOperator('Migration');
+        return $this->getOperator('Migration');
     }
 
     /**
@@ -424,7 +434,7 @@ class Client
      */
     public function certificate()
     {
-        return $this->_getOperator('Certificate');
+        return $this->getOperator('Certificate');
     }
 
     /**
@@ -432,7 +442,7 @@ class Client
      */
     public function siteAlias()
     {
-        return $this->_getOperator('SiteAlias');
+        return $this->getOperator('SiteAlias');
     }
 
     /**
@@ -440,7 +450,7 @@ class Client
      */
     public function ip()
     {
-        return $this->_getOperator('Ip');
+        return $this->getOperator('Ip');
     }
 
     /**
@@ -448,7 +458,7 @@ class Client
      */
     public function eventLog()
     {
-        return $this->_getOperator('EventLog');
+        return $this->getOperator('EventLog');
     }
 
     /**
@@ -456,7 +466,7 @@ class Client
      */
     public function spamFilter()
     {
-        return $this->_getOperator('SpamFilter');
+        return $this->getOperator('SpamFilter');
     }
 
     /**
@@ -464,7 +474,7 @@ class Client
      */
     public function secretKey()
     {
-        return $this->_getOperator('SecretKey');
+        return $this->getOperator('SecretKey');
     }
 
     /**
@@ -472,7 +482,7 @@ class Client
      */
     public function ui()
     {
-        return $this->_getOperator('Ui');
+        return $this->getOperator('Ui');
     }
 
     /**
@@ -480,7 +490,7 @@ class Client
      */
     public function servicePlan()
     {
-        return $this->_getOperator('ServicePlan');
+        return $this->getOperator('ServicePlan');
     }
 
     /**
@@ -488,7 +498,7 @@ class Client
      */
     public function webUser()
     {
-        return $this->_getOperator('WebUser');
+        return $this->getOperator('WebUser');
     }
 
     /**
@@ -496,7 +506,7 @@ class Client
      */
     public function mailList()
     {
-        return $this->_getOperator('MailList');
+        return $this->getOperator('MailList');
     }
 
     /**
@@ -504,7 +514,7 @@ class Client
      */
     public function virtualDirectory()
     {
-        return $this->_getOperator('VirtualDirectory');
+        return $this->getOperator('VirtualDirectory');
     }
 
     /**
@@ -512,7 +522,7 @@ class Client
      */
     public function database()
     {
-        return $this->_getOperator('Database');
+        return $this->getOperator('Database');
     }
 
     /**
@@ -520,7 +530,7 @@ class Client
      */
     public function ftpUser()
     {
-        return $this->_getOperator('FtpUser');
+        return $this->getOperator('FtpUser');
     }
 
     /**
@@ -528,7 +538,7 @@ class Client
      */
     public function session()
     {
-        return $this->_getOperator('Session');
+        return $this->getOperator('Session');
     }
 
     /**
@@ -536,7 +546,7 @@ class Client
      */
     public function updater()
     {
-        return $this->_getOperator('Updater');
+        return $this->getOperator('Updater');
     }
 
     /**
@@ -544,7 +554,7 @@ class Client
      */
     public function locale()
     {
-        return $this->_getOperator('Locale');
+        return $this->getOperator('Locale');
     }
 
     /**
@@ -552,7 +562,7 @@ class Client
      */
     public function logRotation()
     {
-        return $this->_getOperator('LogRotation');
+        return $this->getOperator('LogRotation');
     }
 
     /**
@@ -560,7 +570,7 @@ class Client
      */
     public function backupManager()
     {
-        return $this->_getOperator('BackupManager');
+        return $this->getOperator('BackupManager');
     }
 
     /**
@@ -568,7 +578,7 @@ class Client
      */
     public function sso()
     {
-        return $this->_getOperator('Sso');
+        return $this->getOperator('Sso');
     }
 
     /**
@@ -576,7 +586,7 @@ class Client
      */
     public function protectedDirectory()
     {
-        return $this->_getOperator('ProtectedDirectory');
+        return $this->getOperator('ProtectedDirectory');
     }
 
     /**
@@ -584,7 +594,7 @@ class Client
      */
     public function reseller()
     {
-        return $this->_getOperator('Reseller');
+        return $this->getOperator('Reseller');
     }
 
     /**
@@ -592,7 +602,7 @@ class Client
      */
     public function resellerPlan()
     {
-        return $this->_getOperator('ResellerPlan');
+        return $this->getOperator('ResellerPlan');
     }
 
     /**
@@ -600,7 +610,7 @@ class Client
      */
     public function aps()
     {
-        return $this->_getOperator('Aps');
+        return $this->getOperator('Aps');
     }
 
     /**
@@ -608,7 +618,7 @@ class Client
      */
     public function servicePlanAddon()
     {
-        return $this->_getOperator('ServicePlanAddon');
+        return $this->getOperator('ServicePlanAddon');
     }
 
     /**
@@ -616,7 +626,7 @@ class Client
      */
     public function site()
     {
-        return $this->_getOperator('Site');
+        return $this->getOperator('Site');
     }
 
     /**
@@ -624,7 +634,7 @@ class Client
      */
     public function user()
     {
-        return $this->_getOperator('User');
+        return $this->getOperator('User');
     }
 
     /**
@@ -632,7 +642,7 @@ class Client
      */
     public function role()
     {
-        return $this->_getOperator('Role');
+        return $this->getOperator('Role');
     }
 
     /**
@@ -640,7 +650,7 @@ class Client
      */
     public function businessLogicUpgrade()
     {
-        return $this->_getOperator('BusinessLogicUpgrade');
+        return $this->getOperator('BusinessLogicUpgrade');
     }
 
     /**
@@ -648,7 +658,7 @@ class Client
      */
     public function webmail()
     {
-        return $this->_getOperator('Webmail');
+        return $this->getOperator('Webmail');
     }
 
     /**
@@ -656,7 +666,7 @@ class Client
      */
     public function planItem()
     {
-        return $this->_getOperator('PlanItem');
+        return $this->getOperator('PlanItem');
     }
 
     /**
@@ -664,7 +674,7 @@ class Client
      */
     public function sitebuilder()
     {
-        return $this->_getOperator('Sitebuilder');
+        return $this->getOperator('Sitebuilder');
     }
 
     /**
@@ -672,7 +682,7 @@ class Client
      */
     public function serviceNode()
     {
-        return $this->_getOperator('ServiceNode');
+        return $this->getOperator('ServiceNode');
     }
 
     /**
@@ -680,7 +690,7 @@ class Client
      */
     public function ipBan()
     {
-        return $this->_getOperator('IpBan');
+        return $this->getOperator('IpBan');
     }
 
     /**
@@ -688,7 +698,7 @@ class Client
      */
     public function wpInstance()
     {
-        return $this->_getOperator('WpInstance');
+        return $this->getOperator('WpInstance');
     }
 
     /**
@@ -696,7 +706,6 @@ class Client
      */
     public function phpHandler()
     {
-        return $this->_getOperator('PHPHandler');
+        return $this->getOperator('PHPHandler');
     }
-
 }

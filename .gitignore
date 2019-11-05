@@ -4,4 +4,4 @@
 composer.lock
 composer.phar
 node_modules
-
+.env

@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api;
@@ -8,6 +9,10 @@ namespace PleskX\Api;
  */
 class XmlResponse extends \SimpleXMLElement
 {
+    /**
+     * @var \SimpleXMLElement
+     */
+    private $gen_info;
 
     /**
      * Retrieve value by node name
@@ -19,5 +24,4 @@ class XmlResponse extends \SimpleXMLElement
     {
         return (string)$this->xpath('//' . $node)[0];
     }
-
 }

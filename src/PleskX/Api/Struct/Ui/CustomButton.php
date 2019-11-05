@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Struct\Ui;
@@ -31,8 +32,8 @@ class CustomButton extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->_initScalarProperties($apiResponse, ['id']);
-        $this->_initScalarProperties($apiResponse->properties, [
+        $this->initScalarProperties($apiResponse, ['id']);
+        $this->initScalarProperties($apiResponse->properties, [
             'sort_key',
             'public',
             'internal',

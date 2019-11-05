@@ -1,5 +1,8 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class CustomerTest extends TestCase
 {
@@ -12,41 +15,40 @@ class CustomerTest extends TestCase
 
     public function testCreate()
     {
-        $customer = $this->_client->customer()->create($this->_customerProperties);
-        $this->assertInternalType('integer', $customer->id);
+        $customer = $this->client->customer()->create($this->_customerProperties);
+        $this->assertIsInt($customer->id);
         $this->assertGreaterThan(0, $customer->id);
 
-        $this->_client->customer()->delete('id', $customer->id);
+        $this->client->customer()->delete('id', $customer->id);
     }
 
     public function testDelete()
     {
-        $customer = $this->_client->customer()->create($this->_customerProperties);
-        $result = $this->_client->customer()->delete('id', $customer->id);
+        $customer = $this->client->customer()->create($this->_customerProperties);
+        $result = $this->client->customer()->delete('id', $customer->id);
         $this->assertTrue($result);
     }
 
     public function testGet()
     {
-        $customer = $this->_client->customer()->create($this->_customerProperties);
-        $customerInfo = $this->_client->customer()->get('id', $customer->id);
+        $customer = $this->client->customer()->create($this->_customerProperties);
+        $customerInfo = $this->client->customer()->get('id', $customer->id);
         $this->assertEquals('John Smith', $customerInfo->personalName);
         $this->assertEquals('john-unit-test', $customerInfo->login);
         $this->assertEquals($customer->id, $customerInfo->id);
 
-        $this->_client->customer()->delete('id', $customer->id);
+        $this->client->customer()->delete('id', $customer->id);
     }
 
     public function testGetDomainList()
     {
-        $domainList = $this->_client->customer()->getDomainList('login', 1);
+        $domainList = $this->client->customer()->getDomainList('login', 1);
         $this->assertGreaterThan(0, $domainList[0]->id);
     }
 
     public function testGetAll()
     {
-        $customerList = $this->_client->customer()->get();
+        $customerList = $this->client->customer()->get();
         $this->assertGreaterThan(0, $customerList[0]->id);
     }
-
 }

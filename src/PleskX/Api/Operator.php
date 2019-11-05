@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api;
@@ -10,11 +11,11 @@ class Operator
     protected $_wrapperTag = null;
 
     /** @var \PleskX\Api\Client */
-    protected $_client;
+    protected $client;
 
     public function __construct($client)
     {
-        $this->_client = $client;
+        $this->client = $client;
     }
 
     /**
@@ -42,7 +43,6 @@ class Operator
             $request = "<$wrapperTag>$request</$wrapperTag>";
         }
 
-        return $this->_client->request($request, $mode);
+        return $this->client->request($request, $mode);
     }
-
 }

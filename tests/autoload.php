@@ -1,21 +1,11 @@
 <?php
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
 
-set_include_path(get_include_path() . ':src');
+use Dotenv\Dotenv;
 
-function autoload($className)
-{
-    $path = str_replace('\\', DIRECTORY_SEPARATOR, $className);
-    include($path . '.php');
+require __DIR__ . '/../vendor/autoload.php';
+
+if (!class_exists(Dotenv::class)) {
+    throw new \RuntimeException('You need to run composer install');
 }
 
-spl_autoload_register('autoload');
-
-if ($executionLogFile = getenv('EXECUTION_LOG')) {
-    PleskX\Api\Client::enableExecutionLog();
-
-    register_shutdown_function(function () use ($executionLogFile) {
-        $executionLog = PleskX\Api\Client::getExecutionLog();
-        file_put_contents($executionLogFile, json_encode($executionLog));
-    });
-}
+Dotenv::create(__DIR__ . '/../', '.env')->load();

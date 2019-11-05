@@ -1,4 +1,5 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Struct\Server\Statistics;
@@ -20,7 +21,7 @@ class Version extends \PleskX\Api\Struct
 
     public function __construct($apiResponse)
     {
-        $this->_initScalarProperties($apiResponse, [
+        $this->initScalarProperties($apiResponse, [
             ['plesk_name' => 'internalName'],
             ['plesk_version' => 'version'],
             ['plesk_os' => 'pleskOs'],

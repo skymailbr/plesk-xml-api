@@ -1,5 +1,8 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
+
+namespace Tests;
 
 class SiteTest extends TestCase
 {
@@ -8,17 +11,17 @@ class SiteTest extends TestCase
     private $siteName = 'example-test-child.dom';
 
     /**
-     * 
+     *
      *
      * @return \PleskX\Api\Struct\Webspace\Info
      */
-    private function _createWebspace()
+    private function createWebspace()
     {
 
-        $ips = $this->_client->ip()->get();
+        $ips = $this->client->ip()->get();
         $ipInfo = reset($ips);
 
-        return $this->_client->webspace()->create([
+        return $this->client->webspace()->create([
             'gen_setup' => [
                 'name' => $this->webspaceSiteName,
                 'ip_address' => $ipInfo->ipAddress,
@@ -26,28 +29,31 @@ class SiteTest extends TestCase
             ],
             'hosting' => [
                 'vrt_hst' => [
-                    ['property' => [
-                        'name' => 'ftp_login',
-                        'value' => 'ftpusertest',
-                    ]],
-                    ['property' => [
-                        'name' => 'ftp_password',
-                        'value' => 'ftpuserpasswordtest',
-                    ]],
+                    [
+                        'property' => [
+                            'name' => 'ftp_login',
+                            'value' => 'ftpusertest',
+                        ]
+                    ],
+                    [
+                        'property' => [
+                            'name' => 'ftp_password',
+                            'value' => 'ftpuserpasswordtest',
+                        ]
+                    ],
                     'ip_address' => $ipInfo->ipAddress
                 ],
             ],
             'plan-name' => 'basic'
         ]);
-
     }
 
     /**
      * @return \PleskX\Api\Struct\Webspace\Info
      */
-    private function _createSite($webspace)
+    private function createSite($webspace)
     {
-        return $this->_client->site()->create([
+        return $this->client->site()->create([
             'gen_setup' => [
                 'name' => $this->siteName,
                 'webspace-id' => $webspace->id
@@ -55,54 +61,53 @@ class SiteTest extends TestCase
         ]);
     }
 
-    // public function testCreate()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $site = $this->_createSite($webspace);
-    //     $this->assertInternalType('integer', $site->id);
-    //     $this->assertGreaterThan(0, $site->id);
-    //     $this->_client->site()->delete('id', $site->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testCreate()
+    {
+        $webspace = $this->createWebspace();
+        $site = $this->createSite($webspace);
+        $this->assertIsInt($site->id);
+        $this->assertGreaterThan(0, $site->id);
+        $this->client->site()->delete('id', $site->id);
+        $this->client->webspace()->delete('id', $webspace->id);
+    }
 
-    // public function testDelete()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $site = $this->_createSite($webspace);
-    //     $result = $this->_client->site()->delete('id', $site->id);
-    //     $this->assertTrue($result);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testDelete()
+    {
+        $webspace = $this->createWebspace();
+        $site = $this->createSite($webspace);
+        $result = $this->client->site()->delete('id', $site->id);
+        $this->assertTrue($result);
+        $this->client->webspace()->delete('id', $webspace->id);
+    }
 
-    // public function testGet()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $site = $this->_createSite($webspace);
-    //     $siteInfo = $this->_client->site()->get('id', $site->id);
-    //     $this->assertEquals($this->siteName, $siteInfo->name);
-    //     $this->_client->site()->delete('id', $site->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testGet()
+    {
+        $webspace = $this->createWebspace();
+        $site = $this->createSite($webspace);
+        $siteInfo = $this->client->site()->get('id', $site->id);
+        $this->assertEquals($this->siteName, $siteInfo->name);
+        $this->client->site()->delete('id', $site->id);
+        $this->client->webspace()->delete('id', $webspace->id);
+    }
 
     public function testData()
     {
-        $webspace = $this->_createWebspace();
-        $site = $this->_createSite($webspace);
-        $siteInfo = $this->_client->site()->getData('id', $site->id);
+        $webspace = $this->createWebspace();
+        $site = $this->createSite($webspace);
+        $siteInfo = $this->client->site()->getData('id', $site->id);
         $this->assertEquals($this->siteName, $siteInfo->genInfo->name);
         $this->assertEquals($site->id, $siteInfo->id);
-        $this->_client->site()->delete('id', $site->id);
-        $this->_client->webspace()->delete('id', $webspace->id);
+        $this->client->site()->delete('id', $site->id);
+        $this->client->webspace()->delete('id', $webspace->id);
     }
 
-    // public function testDataSearchBySpace()
-    // {
-    //     $webspace = $this->_createWebspace();
-    //     $site = $this->_createSite($webspace);
-    //     $siteInfo = $this->_client->site()->getData('parent-id', $webspace->id);
-    //     $this->assertEquals($this->siteName, $siteInfo[0]->genInfo->name);
-    //     $this->_client->site()->delete('id', $site->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
-
+    public function testDataSearchBySpace()
+    {
+        $webspace = $this->createWebspace();
+        $site = $this->createSite($webspace);
+        $siteInfo = $this->client->site()->getData('parent-id', $webspace->id);
+        $this->assertEquals($this->siteName, $siteInfo[0]->genInfo->name);
+        $this->client->site()->delete('id', $site->id);
+        $this->client->webspace()->delete('id', $webspace->id);
+    }
 }

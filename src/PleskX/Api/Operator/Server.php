@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\Server as Struct;
 
 class Server extends \PleskX\Api\Operator
@@ -12,26 +14,26 @@ class Server extends \PleskX\Api\Operator
      */
     public function getProtos()
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('server')->addChild('get_protos');
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
 
         return (array)$response->protos->proto;
     }
 
     public function getGeneralInfo()
     {
-        return new Struct\GeneralInfo($this->_getInfo('gen_info'));
+        return new Struct\GeneralInfo($this->getInfo('gen_info'));
     }
 
     public function getPreferences()
     {
-        return new Struct\Preferences($this->_getInfo('prefs'));
+        return new Struct\Preferences($this->getInfo('prefs'));
     }
 
     public function getAdmin()
     {
-        return new Struct\Admin($this->_getInfo('admin'));
+        return new Struct\Admin($this->getInfo('admin'));
     }
 
     /**
@@ -40,7 +42,7 @@ class Server extends \PleskX\Api\Operator
     public function getKeyInfo()
     {
         $keyInfo = [];
-        $keyInfoXml = $this->_getInfo('key');
+        $keyInfoXml = $this->getInfo('key');
 
         foreach ($keyInfoXml->property as $property) {
             $keyInfo[(string)$property->name] = (string)$property->value;
@@ -55,7 +57,7 @@ class Server extends \PleskX\Api\Operator
     public function getComponents()
     {
         $components = [];
-        $componentsXml = $this->_getInfo('components');
+        $componentsXml = $this->getInfo('components');
 
         foreach ($componentsXml->component as $component) {
             $components[(string)$component->name] = (string)$component->version;
@@ -70,7 +72,7 @@ class Server extends \PleskX\Api\Operator
     public function getServiceStates()
     {
         $states = [];
-        $statesXml = $this->_getInfo('services_state');
+        $statesXml = $this->getInfo('services_state');
 
         foreach ($statesXml->srv as $service) {
             $states[(string)$service->id] = [
@@ -85,7 +87,7 @@ class Server extends \PleskX\Api\Operator
 
     public function getSessionPreferences()
     {
-        return new Struct\SessionPreferences($this->_getInfo('session_setup'));
+        return new Struct\SessionPreferences($this->getInfo('session_setup'));
     }
 
     /**
@@ -94,7 +96,7 @@ class Server extends \PleskX\Api\Operator
     public function getShells()
     {
         $shells = [];
-        $shellsXml = $this->_getInfo('shells');
+        $shellsXml = $this->getInfo('shells');
 
         foreach ($shellsXml->shell as $shell) {
             $shells[(string)$shell->name] = (string)$shell->path;
@@ -108,13 +110,13 @@ class Server extends \PleskX\Api\Operator
      */
     public function getNetworkInterfaces()
     {
-        $interfacesXml = $this->_getInfo('interfaces');
+        $interfacesXml = $this->getInfo('interfaces');
         return (array)$interfacesXml->interface;
     }
 
     public function getStatistics()
     {
-        return new Struct\Statistics($this->_getInfo('stat'));
+        return new Struct\Statistics($this->getInfo('stat'));
     }
 
     /**
@@ -123,7 +125,7 @@ class Server extends \PleskX\Api\Operator
     public function getSiteIsolationConfig()
     {
         $config = [];
-        $configXml = $this->_getInfo('site-isolation-config');
+        $configXml = $this->getInfo('site-isolation-config');
 
         foreach ($configXml->property as $property) {
             $config[(string)$property->name] = (string)$property->value;
@@ -134,7 +136,7 @@ class Server extends \PleskX\Api\Operator
 
     public function getUpdatesInfo()
     {
-        return new Struct\UpdatesInfo($this->_getInfo('updates'));
+        return new Struct\UpdatesInfo($this->getInfo('updates'));
     }
 
     /**
@@ -144,13 +146,13 @@ class Server extends \PleskX\Api\Operator
      */
     public function createSession($login, $clientIp)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $sessionNode = $packet->addChild('server')->addChild('create_session');
         $sessionNode->addChild('login', $login);
         $dataNode = $sessionNode->addChild('data');
         $dataNode->addChild('user_ip', base64_encode($clientIp));
         $dataNode->addChild('source_server');
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
 
         return (string)$response->id;
     }
@@ -159,13 +161,12 @@ class Server extends \PleskX\Api\Operator
      * @param string $operation
      * @return \SimpleXMLElement
      */
-    private function _getInfo($operation)
+    private function getInfo($operation)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('server')->addChild('get')->addChild($operation);
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
 
         return $response->$operation;
     }
-
 }

@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\Webspace as Struct;
 
 class Webspace extends \PleskX\Api\Operator
@@ -32,8 +34,8 @@ class Webspace extends \PleskX\Api\Operator
     public function create($properties)
     {
         $properties = ['webspace' => ['add' => $properties]];
-        $packet = $this->_client->genRequestXml($properties);
-        $response = $this->_client->request($packet);
+        $packet = $this->client->genRequestXml($properties);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -44,9 +46,9 @@ class Webspace extends \PleskX\Api\Operator
      */
     public function delete($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $packet->addChild('webspace')->addChild('del')->addChild('filter')->addChild($field, $value);
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return 'ok' === (string)$response->status;
     }
 
@@ -62,8 +64,8 @@ class Webspace extends \PleskX\Api\Operator
     public function set($field, $value, $properties)
     {
         $properties = ['webspace' => ['set' => ['filter' => [ $field => $value ], 'values' => $properties ]]];
-        $packet = $this->_client->genRequestXml($properties);
-        $response = $this->_client->request($packet);
+        $packet = $this->client->genRequestXml($properties);
+        $response = $this->client->request($packet);
         return new Struct\Info($response);
     }
 
@@ -76,27 +78,29 @@ class Webspace extends \PleskX\Api\Operator
      */
     public function get($field, $value)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('webspace')->addChild('get');
         $getTag->addChild('filter')->addChild($field, $value);
         $getTag->addChild('dataset')->addChild('gen_info');
-        $response = $this->_client->request($packet);
+        $response = $this->client->request($packet);
         return new Struct\GeneralInfo($response->data->gen_info);
     }
     
     /**
-     * Get Data of webspace 
+     * Get Data of webspace
      *
      * @param string $field optional
      * @param integer|string $value optional
      * @return mixed Struct\Data|Array
      */
-    public function getData($field=null,$value=null)
+    public function getData($field = null, $value = null)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('webspace')->addChild('get');
         $g = $getTag->addChild('filter');
-        if ($field) $g->addChild($field, $value);
+        if ($field) {
+            $g->addChild($field, $value);
+        }
         $dataset = $getTag->addChild('dataset');
         $dataset->addChild('gen_info');
         $dataset->addChild('hosting');
@@ -106,39 +110,42 @@ class Webspace extends \PleskX\Api\Operator
         $dataset->addChild('disk_usage');
         $dataset->addChild('performance');
         $dataset->addChild('subscriptions');
-        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'webspace'}->{'get'}->result;
-        $ret = NULL;
-        if ( in_array($field,['id','name']) && isset( $response->id ) ) {
+        $response = $this->client->request($packet, \PleskX\Api\Client::RESPONSE_FULL)->{'webspace'}->{'get'}->result;
+        $ret = null;
+        if (in_array($field, ['id', 'name']) && isset($response->id)) {
             $ret = new Struct\Data($response);
         } else {
             $ret = [];
             foreach ($response as $f) {
-                if ( isset( $f->id ) ) 
+                if (isset($f->id)) {
                     $ret[] = new Struct\Data($f);
+                }
             }
         }
         return $ret;
     }
 
     /**
-     * Get Traffic of webspace 
+     * Get Traffic of webspace
      *
      * @param string $field
      * @param integer|string $value
-     * @param DateTime $sinceDate optional
-     * @param DateTime $toDate optional
+     * @param \DateTime $sinceDate optional
+     * @param \DateTime $toDate optional
      * @return Struct\Data
      */
-    public function getTraffic($field, $value, $sinceDate = NULL, $toDate = NULL )
+    public function getTraffic($field, $value, $sinceDate = null, $toDate = null)
     {
-        $packet = $this->_client->getPacket();
+        $packet = $this->client->getPacket();
         $getTag = $packet->addChild('webspace')->addChild('get_traffic');
         $getTag->addChild('filter')->addChild($field, $value);
-        if ( $sinceDate ) $getTag->addChild('since_date', $sinceDate->format('Y-m-d'));
-        if ( $toDate ) $getTag->addChild('to_date', $toDate->format('Y-m-d'));
-        $response = $this->_client->request($packet);
+        if ($sinceDate) {
+            $getTag->addChild('since_date', $sinceDate->format('Y-m-d'));
+        }
+        if ($toDate) {
+            $getTag->addChild('to_date', $toDate->format('Y-m-d'));
+        }
+        $response = $this->client->request($packet);
         return new Struct\Traffic($response->traffic);
     }
-
-
 }

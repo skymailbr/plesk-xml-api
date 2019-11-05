@@ -1,7 +1,9 @@
 <?php
+
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
 namespace PleskX\Api\Operator;
+
 use PleskX\Api\Struct\EventLog as Struct;
 
 class EventLog extends \PleskX\Api\Operator
@@ -46,5 +48,4 @@ class EventLog extends \PleskX\Api\Operator
     {
         return (int)$this->request('get-last-id')->getValue('id');
     }
-
 }
