@@ -1,7 +1,10 @@
-
 # vendor
 /vendor/
 
 # tests
 /phpunit.xml
 /php/tests/node_modules/
+
+#composer
+composer.lock
+composer.phar

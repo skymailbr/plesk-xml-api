@@ -9,7 +9,7 @@ class CustomerTest extends TestCase
 {
     private $_customerProperties;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->_customerProperties = [
             'cname' => 'Plesk',
