@@ -25,12 +25,10 @@ class ProtectedDirectoryTest extends TestCase
         static::$_client->protectedDirectory()->delete('id', $protectedDirectory->id);
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1019
-     */
     public function testAddInvalidDirectory()
     {
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1019);
         static::$_client->protectedDirectory()->add('', static::$webspace->id);
     }
 
@@ -52,12 +50,10 @@ class ProtectedDirectoryTest extends TestCase
         static::$_client->protectedDirectory()->delete('id', $protectedDirectory->id);
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1013
-     */
     public function testGetUnknownDirectory()
     {
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1013);
         $nonExistentDirectoryId = 99999999;
         static::$_client->protectedDirectory()->get('id', $nonExistentDirectoryId);
     }
