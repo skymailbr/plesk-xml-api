@@ -1,104 +1,95 @@
 <?php
-
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
-
-use PleskX\Api\Client;
-use PleskX\Api\Client\Exception;
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
 class ApiClientTest extends TestCase
 {
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1005
-     */
     public function testWrongProtocol()
     {
-        $packet = $this->client->getPacket('100.0.0');
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1005);
+        $packet = static::$_client->getPacket('100.0.0');
         $packet->addChild('server')->addChild('get_protos');
-        $this->client->request($packet);
+        static::$_client->request($packet);
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1014
-     */
     public function testUnknownOperator()
     {
-        $packet = $this->client->getPacket();
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1014);
+        $packet = static::$_client->getPacket();
         $packet->addChild('unknown');
-        $this->client->request($packet);
+        static::$_client->request($packet);
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1014
-     */
     public function testInvalidXmlRequest()
     {
-        $this->client->request('<packet><wrongly formatted xml</packet>');
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1014);
+        static::$_client->request('<packet><wrongly formatted xml</packet>');
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 1001
-     */
     public function testInvalidCredentials()
     {
-        $host = getenv('REMOTE_HOST');
-        $client = new Client($host);
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(1001);
+        $host = static::$_client->getHost();
+        $port = static::$_client->getPort();
+        $protocol = static::$_client->getProtocol();
+        $client = new \PleskX\Api\Client($host, $port, $protocol);
         $client->setCredentials('bad-login', 'bad-password');
-        $packet = $this->client->getPacket();
+        $packet = static::$_client->getPacket();
         $packet->addChild('server')->addChild('get_protos');
         $client->request($packet);
     }
 
-    /**
-     * @expectedException \PleskX\Api\Exception
-     * @expectedExceptionCode 11003
-     */
     public function testInvalidSecretKey()
     {
-        $host = getenv('REMOTE_HOST');
-        $client = new Client($host);
+        $this->expectException(\PleskX\Api\Exception::class);
+        $this->expectExceptionCode(11003);
+        $host = static::$_client->getHost();
+        $port = static::$_client->getPort();
+        $protocol = static::$_client->getProtocol();
+        $client = new \PleskX\Api\Client($host, $port, $protocol);
         $client->setSecretKey('bad-key');
-        $packet = $this->client->getPacket();
+        $packet = static::$_client->getPacket();
         $packet->addChild('server')->addChild('get_protos');
         $client->request($packet);
     }
 
     public function testLatestMajorProtocol()
     {
-        $packet = $this->client->getPacket('1.6');
+        $packet = static::$_client->getPacket('1.6');
         $packet->addChild('server')->addChild('get_protos');
-        $this->client->request($packet);
+        $result = static::$_client->request($packet);
+        $this->assertEquals('ok', $result->status);
     }
 
     public function testLatestMinorProtocol()
     {
-        $packet = $this->client->getPacket('1.6.5');
+        $packet = static::$_client->getPacket('1.6.5');
         $packet->addChild('server')->addChild('get_protos');
-        $this->client->request($packet);
+        $result = static::$_client->request($packet);
+        $this->assertEquals('ok', $result->status);
     }
 
     public function testRequestShortSyntax()
     {
-        $response = $this->client->request('server.get.gen_info');
+        $response = static::$_client->request('server.get.gen_info');
         $this->assertGreaterThan(0, strlen($response->gen_info->server_name));
     }
 
     public function testOperatorPlainRequest()
     {
-        $response = $this->client->server()->request('get.gen_info');
+        $response = static::$_client->server()->request('get.gen_info');
         $this->assertGreaterThan(0, strlen($response->gen_info->server_name));
         $this->assertEquals(36, strlen($response->getValue('server_guid')));
     }
 
     public function testRequestArraySyntax()
     {
-        $response = $this->client->request([
+        $response = static::$_client->request([
             'server' => [
                 'get' => [
                     'gen_info' => '',
@@ -110,13 +101,13 @@ class ApiClientTest extends TestCase
 
     public function testOperatorArraySyntax()
     {
-        $response = $this->client->server()->request(['get' => ['gen_info' => '']]);
+        $response = static::$_client->server()->request(['get' => ['gen_info' => '']]);
         $this->assertGreaterThan(0, strlen($response->gen_info->server_name));
     }
 
     public function testMultiRequest()
     {
-        $responses = $this->client->multiRequest([
+        $responses = static::$_client->multiRequest([
             'server.get_protos',
             'server.get.gen_info',
         ]);
@@ -130,12 +121,45 @@ class ApiClientTest extends TestCase
         $this->assertGreaterThan(0, strlen($generalInfo->gen_info->server_name));
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testConnectionError()
     {
-        $client = new Client('invalid-host.dom');
+        $this->expectException(\PleskX\Api\Client\Exception::class);
+        $this->expectExceptionMessage('Could not resolve host: invalid-host.dom');
+        $client = new \PleskX\Api\Client('invalid-host.dom');
         $client->server()->getProtos();
+    }
+
+    public function testGetHost()
+    {
+        $client = new \PleskX\Api\Client('example.dom');
+        $this->assertEquals('example.dom', $client->getHost());
+    }
+
+    public function testGetPort()
+    {
+        $client = new \PleskX\Api\Client('example.dom', 12345);
+        $this->assertEquals(12345, $client->getPort());
+    }
+
+    public function testGetProtocol()
+    {
+        $client = new \PleskX\Api\Client('example.dom', 8880, 'http');
+        $this->assertEquals('http', $client->getProtocol());
+    }
+
+    public function testSetVerifyResponse()
+    {
+        static::$_client->setVerifyResponse(function ($xml) {
+            if ($xml->xpath('//proto')) {
+                throw new \PleskX\Api\Exception('proto');
+            }
+        });
+        try {
+            static::$_client->server()->getProtos();
+        } catch (\PleskX\Api\Exception $e) {
+            $this->assertEquals('proto', $e->getMessage());
+        } finally {
+            static::$_client->setVerifyResponse();
+        }
     }
 }

@@ -1,15 +1,12 @@
 <?php
-
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
 class IpTest extends TestCase
 {
-
     public function testGet()
     {
-        $ips = $this->client->ip()->get();
+        $ips = static::$_client->ip()->get();
         $this->assertGreaterThan(0, count($ips));
 
         $ip = reset($ips);

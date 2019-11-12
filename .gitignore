@@ -1,9 +1,10 @@
-/php/tests/node_modules
-/vendor
+# vendor
+/vendor/
+
+# tests
 /phpunit.xml
-composer.lock
+/php/tests/node_modules/
+/.phpunit.result.cache
+
+#composer
 composer.phar
-node_modules
-.env
-.phpunit.result.cache
-.idea

@@ -1,148 +1,234 @@
 <?php
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+use PleskXTest\Utility\PasswordProvider;
 
 class DatabaseTest extends TestCase
 {
+    /** @var \PleskX\Api\Struct\Webspace\Info */
+    private static $webspace;
 
-    private $webspaceSiteName = 'example-test-parent.dom';
-
-    private function createWebspace()
+    public static function setUpBeforeClass(): void
     {
-
-        $ips = $this->client->ip()->get();
-        $ipInfo = reset($ips);
-
-        return $this->client->webspace()->create([
-            'gen_setup' => [
-                'name' => $this->webspaceSiteName,
-                'ip_address' => $ipInfo->ipAddress,
-                'htype' => 'vrt_hst'
-            ],
-            'hosting' => [
-                'vrt_hst' => [
-                    ['property' => [
-                        'name' => 'ftp_login',
-                        'value' => 'ftpusertest',
-                    ]],
-                    ['property' => [
-                        'name' => 'ftp_password',
-                        'value' => 'passwordtest',
-                    ]],
-                    'ip_address' => $ipInfo->ipAddress
-                ],
-            ],
-            'plan-name' => 'basic'
-        ]);
-    }
-
-
-    private function createDatabase($webspace, $name = 'newdatabase')
-    {
-        return $this->client->database()->create([
-            'webspace-id' => $webspace->id,
-            'name' => $name,
-            'type' => 'mysql'
-        ]);
-    }
-
-    private function createUser($database, $login = 'newuserdatabase')
-    {
-        return $this->client->database()->createUser([
-            'db-id' => $database->id,
-            'login' => $login,
-            'password' => 'dbpassword'
-        ]);
+        parent::setUpBeforeClass();
+        static::$webspace = static::_createWebspace();
     }
 
     public function testCreate()
     {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $this->assertGreaterThan(0, $database->id);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
-
-    public function testDelete()
-    {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $result = $this->client->database()->delete('id', $database->id);
-        $this->assertTrue($result);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
-
-    public function testGet()
-    {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $databaseInfo = $this->client->database()->get('id', $database->id);
-        $this->assertGreaterThan(0, $databaseInfo->id);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
-
-    public function testGetAllWebspace()
-    {
-        $webspace = $this->createWebspace();
-        $database1 = $this->createDatabase($webspace);
-        $database2 = $this->createDatabase($webspace, 'database2');
-
-        $databaseInfo = $this->client->database()->get('webspace-id', $webspace->id);
-        $this->assertGreaterThan(0, $databaseInfo[0]->id);
-        $this->assertGreaterThan(0, $databaseInfo[1]->id);
-
-        $this->client->database()->delete('id', $database1->id);
-        $this->client->database()->delete('id', $database2->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        static::$_client->database()->delete('id', $database->id);
     }
 
     public function testCreateUser()
     {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $user = $this->createUser($database);
-        $this->assertGreaterThan(0, $user->id);
-        $this->client->database()->deleteUser('id', $user->id);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $user = $this->_createUser([
+            'db-id' => $database->id,
+            'login' => 'test_user1',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+        static::$_client->database()->deleteUser('id', $user->id);
+        static::$_client->database()->delete('id', $database->id);
     }
 
-    public function testSetUser()
+    public function testUpdateUser()
     {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $user = $this->createUser($database);
-        $result = $this->client->database()->setUser($user->id, ['password' => 'daskljaskljdaskladj']);
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $user = $this->_createUser([
+            'db-id' => $database->id,
+            'login' => 'test_user1',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+        $updatedUser = static::$_client->database()->updateUser([
+            'id' => $user->id,
+            'login' => 'test_user2',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+        $this->assertEquals(true, $updatedUser);
+        static::$_client->database()->deleteUser('id', $user->id);
+        static::$_client->database()->delete('id', $database->id);
+    }
+
+    public function testGetById()
+    {
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+
+        $db = static::$_client->database()->get('id', $database->id);
+        $this->assertEquals('test1', $db->name);
+        $this->assertEquals('mysql', $db->type);
+        $this->assertEquals(static::$webspace->id, $db->webspaceId);
+        $this->assertEquals(1, $db->dbServerId);
+
+        static::$_client->database()->delete('id', $database->id);
+    }
+
+    public function testGetAllByWebspaceId()
+    {
+        $db1 = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $db2 = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test2',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $databases = static::$_client->database()->getAll('webspace-id', static::$webspace->id);
+        $this->assertEquals('test1', $databases[0]->name);
+        $this->assertEquals('test2', $databases[1]->name);
+        $this->assertEquals(static::$webspace->id, $databases[0]->webspaceId);
+        $this->assertEquals(1, $databases[1]->dbServerId);
+
+        static::$_client->database()->delete('id', $db1->id);
+        static::$_client->database()->delete('id', $db2->id);
+    }
+
+    public function testGetUserById()
+    {
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+
+        $user = $this->_createUser([
+            'db-id' => $database->id,
+            'login' => 'test_user1',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $dbUser = static::$_client->database()->getUser('id', $user->id);
+        $this->assertEquals('test_user1', $dbUser->login);
+        $this->assertEquals($database->id, $dbUser->dbId);
+
+        static::$_client->database()->deleteUser('id', $user->id);
+        static::$_client->database()->delete('id', $database->id);
+    }
+
+    public function testGetAllUsersByDbId()
+    {
+        $db1 = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $db2 = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test2',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $user1 = $this->_createUser([
+            'db-id' => $db1->id,
+            'login' => 'test_user1',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $user2 = $this->_createUser([
+            'db-id' => $db1->id,
+            'login' => 'test_user2',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $user3 = $this->_createUser([
+            'db-id' => $db2->id,
+            'login' => 'test_user3',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $dbUsers = static::$_client->database()->getAllUsers('db-id', $db1->id);
+        $this->assertEquals(2, count($dbUsers));
+        $this->assertEquals('test_user1', $dbUsers[0]->login);
+        $this->assertEquals('test_user2', $dbUsers[1]->login);
+
+        static::$_client->database()->deleteUser('id', $user1->id);
+        static::$_client->database()->deleteUser('id', $user2->id);
+        static::$_client->database()->deleteUser('id', $user3->id);
+        static::$_client->database()->delete('id', $db1->id);
+        static::$_client->database()->delete('id', $db2->id);
+    }
+
+    public function testDelete()
+    {
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $result = static::$_client->database()->delete('id', $database->id);
         $this->assertTrue($result);
-        $this->client->database()->deleteUser('id', $user->id);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testDeleteUser()
     {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $user = $this->createUser($database);
-        $result = $this->client->database()->deleteUser('id', $user->id);
+        $database = $this->_createDatabase([
+            'webspace-id' => static::$webspace->id,
+            'name' => 'test1',
+            'type' => 'mysql',
+            'db-server-id' => 1,
+        ]);
+        $user = $this->_createUser([
+            'db-id' => $database->id,
+            'login' => 'test_user1',
+            'password' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $result = static::$_client->database()->deleteUser('id', $user->id);
         $this->assertTrue($result);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        static::$_client->database()->delete('id', $database->id);
     }
 
-    public function testGetUser()
+    /**
+     * @param array $params
+     * @return \PleskX\Api\Struct\Database\Info
+     */
+    private function _createDatabase(array $params)
     {
-        $webspace = $this->createWebspace();
-        $database = $this->createDatabase($webspace);
-        $user = $this->createUser($database);
-        $userInfo = $this->client->database()->getUser('id', $user->id);
-        $this->assertGreaterThan(0, $userInfo->id);
-        $this->client->database()->deleteUser('id', $user->id);
-        $this->client->database()->delete('id', $database->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $database = static::$_client->database()->create($params);
+        $this->assertIsInt($database->id);
+        $this->assertGreaterThan(0, $database->id);
+
+        return $database;
+    }
+
+    /**
+     * @param array $params
+     * @return \PleskX\Api\Struct\Database\UserInfo
+     */
+    private function _createUser(array $params)
+    {
+        $user = static::$_client->database()->createUser($params);
+        $this->assertIsInt($user->id);
+        $this->assertGreaterThan(0, $user->id);
+
+        return $user;
     }
 }

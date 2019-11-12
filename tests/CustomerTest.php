@@ -1,54 +1,85 @@
 <?php
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+use PleskXTest\Utility\KeyLimitChecker;
+use PleskXTest\Utility\PasswordProvider;
 
 class CustomerTest extends TestCase
 {
+    private $_customerProperties;
 
-    private $_customerProperties = [
-        'pname' => 'John Smith',
-        'login' => 'john-unit-test',
-        'passwd' => 'simple-password',
-    ];
+    public function setUp(): void
+    {
+        $this->_customerProperties = [
+            'cname' => 'Plesk',
+            'pname' => 'John Smith',
+            'login' => 'john-unit-test',
+            'passwd' => PasswordProvider::STRONG_PASSWORD,
+            'email' => 'john@smith.com',
+            'external-id' => 'link:12345',
+            'description' => 'Good guy',
+        ];
+    }
 
     public function testCreate()
     {
-        $customer = $this->client->customer()->create($this->_customerProperties);
+        $customer = static::$_client->customer()->create($this->_customerProperties);
         $this->assertIsInt($customer->id);
         $this->assertGreaterThan(0, $customer->id);
 
-        $this->client->customer()->delete('id', $customer->id);
+        static::$_client->customer()->delete('id', $customer->id);
     }
 
     public function testDelete()
     {
-        $customer = $this->client->customer()->create($this->_customerProperties);
-        $result = $this->client->customer()->delete('id', $customer->id);
+        $customer = static::$_client->customer()->create($this->_customerProperties);
+        $result = static::$_client->customer()->delete('id', $customer->id);
         $this->assertTrue($result);
     }
 
     public function testGet()
     {
-        $customer = $this->client->customer()->create($this->_customerProperties);
-        $customerInfo = $this->client->customer()->get('id', $customer->id);
+        $customer = static::$_client->customer()->create($this->_customerProperties);
+        $customerInfo = static::$_client->customer()->get('id', $customer->id);
+        $this->assertEquals('Plesk', $customerInfo->company);
         $this->assertEquals('John Smith', $customerInfo->personalName);
         $this->assertEquals('john-unit-test', $customerInfo->login);
-        $this->assertEquals($customer->id, $customerInfo->id);
+        $this->assertEquals('john@smith.com', $customerInfo->email);
+        $this->assertEquals('Good guy', $customerInfo->description);
+        $this->assertEquals('link:12345', $customerInfo->externalId);
 
-        $this->client->customer()->delete('id', $customer->id);
-    }
-
-    public function testGetDomainList()
-    {
-        $domainList = $this->client->customer()->getDomainList('login', 1);
-        $this->assertGreaterThan(0, $domainList[0]->id);
+        static::$_client->customer()->delete('id', $customer->id);
     }
 
     public function testGetAll()
     {
-        $customerList = $this->client->customer()->get();
-        $this->assertGreaterThan(0, $customerList[0]->id);
+        $keyInfo = static::$_client->server()->getKeyInfo();
+
+        if (!KeyLimitChecker::checkByType($keyInfo, KeyLimitChecker::LIMIT_CLIENTS, 2)) {
+            $this->markTestSkipped('License does not allow to create more than 1 customer.');
+        }
+
+        static::$_client->customer()->create([
+            'pname' => 'John Smith',
+            'login' => 'customer-a',
+            'passwd' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+        static::$_client->customer()->create([
+            'pname' => 'Mike Black',
+            'login' => 'customer-b',
+            'passwd' => PasswordProvider::STRONG_PASSWORD,
+        ]);
+
+        $customersInfo = static::$_client->customer()->getAll();
+        $this->assertIsArray($customersInfo);
+
+        $customersCheck = array_filter($customersInfo, function ($value) {
+            return $value->personalName === 'John Smith' || $value->personalName === 'Mike Black';
+        });
+        $this->assertCount(2, $customersCheck);
+
+        static::$_client->customer()->delete('login', 'customer-a');
+        static::$_client->customer()->delete('login', 'customer-b');
     }
 }

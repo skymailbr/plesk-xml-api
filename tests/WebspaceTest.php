@@ -1,147 +1,176 @@
 <?php
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+use PleskXTest\Utility\PasswordProvider;
 
 class WebspaceTest extends TestCase
 {
-
-    private $webspaceSiteName = 'example-test-parent.dom';
-    private $siteName = 'example-test-child.dom';
-    private $trafficTestSite = 'worksecurity.net'; //SITE HOSTED BY MY PLESK
-
-    /**
-     *
-     *
-     * @return \PleskX\Api\Struct\Webspace\Info
-     */
-    private function createWebspace()
-    {
-
-        $ips = $this->client->ip()->get();
-        $ipInfo = reset($ips);
-
-        return $this->client->webspace()->create([
-            'gen_setup' => [
-                'name' => $this->webspaceSiteName,
-                'ip_address' => $ipInfo->ipAddress,
-                'htype' => 'vrt_hst'
-            ],
-            'hosting' => [
-                'vrt_hst' => [
-                    ['property' => [
-                        'name' => 'ftp_login',
-                        'value' => 'ftpusertest',
-                    ]],
-                    ['property' => [
-                        'name' => 'ftp_password',
-                        'value' => 'ftpuserpasswordtest',
-                    ]],
-                    'ip_address' => $ipInfo->ipAddress
-                ],
-            ],
-            'plan-name' => 'basic'
-        ]);
-    }
-
-
     public function testGetPermissionDescriptor()
     {
-        $descriptor = $this->client->webspace()->getPermissionDescriptor();
+        $descriptor = static::$_client->webspace()->getPermissionDescriptor();
         $this->assertIsArray($descriptor->permissions);
-        $this->assertGreaterThan(0, count($descriptor->permissions));
+        $this->assertNotEmpty($descriptor->permissions);
     }
 
     public function testGetLimitDescriptor()
     {
-        $descriptor = $this->client->webspace()->getLimitDescriptor();
+        $descriptor = static::$_client->webspace()->getLimitDescriptor();
         $this->assertIsArray($descriptor->limits);
-        $this->assertGreaterThan(0, count($descriptor->limits));
+        $this->assertNotEmpty($descriptor->limits);
+    }
+
+    public function testGetDiskUsage()
+    {
+        $webspace = static::_createWebspace();
+        $diskusage = static::$_client->webspace()->getDiskUsage('id', $webspace->id);
+
+        $this->assertObjectHasAttribute('httpdocs', $diskusage);
+
+        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
     public function testGetPhysicalHostingDescriptor()
     {
-        $descriptor = $this->client->webspace()->getPhysicalHostingDescriptor();
+        $descriptor = static::$_client->webspace()->getPhysicalHostingDescriptor();
         $this->assertIsArray($descriptor->properties);
-        $this->assertGreaterThan(0, count($descriptor->properties));
+        $this->assertNotEmpty($descriptor->properties);
 
         $ftpLoginProperty = $descriptor->properties['ftp_login'];
         $this->assertEquals('ftp_login', $ftpLoginProperty->name);
         $this->assertEquals('string', $ftpLoginProperty->type);
     }
 
-    public function testCreate()
+    public function testGetPhpSettings()
     {
-        $webspace = $this->createWebspace();
-        $this->assertIsInt($webspace->id);
+        $webspace = static::_createWebspace();
+        $info = static::$_client->webspace()->getPhpSettings('id', $webspace->id);
+
+        $this->assertArrayHasKey('open_basedir', $info->properties);
+
+        static::$_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testGetLimits()
+    {
+        $webspace = static::_createWebspace();
+        $limits = static::$_client->webspace()->getLimits('id', $webspace->id);
+
+        $this->assertIsArray($limits->limits);
+        $this->assertNotEmpty($limits->limits);
+
+        static::$_client->webspace()->delete('id', $webspace->id);
+    }
+
+    public function testCreateWebspace()
+    {
+        $webspace = static::_createWebspace();
+
         $this->assertGreaterThan(0, $webspace->id);
 
-        $this->client->webspace()->delete('id', $webspace->id);
+        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
     public function testDelete()
     {
-        $webspace = $this->createWebspace();
-        $result = $this->client->webspace()->delete('id', $webspace->id);
+        $webspace = static::_createWebspace();
+        $result = static::$_client->webspace()->delete('id', $webspace->id);
+
         $this->assertTrue($result);
+    }
+
+    public function testRequestCreateWebspace()
+    {
+        $handlers = static::$_client->phpHandler()->getAll();
+        $enabledHandlers = array_filter($handlers, function ($handler) {
+            return $handler->handlerStatus !== 'disabled';
+        });
+        $this->assertGreaterThan(0, count($enabledHandlers));
+        $handler = current($enabledHandlers);
+
+        $request = [
+            'add' => [
+                'gen_setup' => [
+                    'name' => 'webspace-test-full.test',
+                    'htype' => 'vrt_hst',
+                    'status' => '0',
+                    'ip_address' => [static::_getIpAddress()],
+                ],
+                'hosting' => [
+                    'vrt_hst' => [
+                        'property' => [
+                            [
+                                'name' => 'php_handler_id',
+                                'value' => $handler->id,
+                            ],
+                            [
+                                'name' => 'ftp_login',
+                                'value' => 'testuser',
+                            ],
+                            [
+                                'name' => 'ftp_password',
+                                'value' => PasswordProvider::STRONG_PASSWORD,
+                            ],
+                        ],
+                        'ip_address' => static::_getIpAddress(),
+                    ],
+                ],
+                'limits' => [
+                    'overuse' => 'block',
+                    'limit' => [
+                        [
+                            'name' => 'mbox_quota',
+                            'value' => 100,
+                        ],
+                    ],
+                ],
+                'prefs' => [
+                    'www' => 'false',
+                    'stat_ttl' => 6,
+                ],
+                'performance' => [
+                    'bandwidth' => 120,
+                    'max_connections' => 10000,
+                ],
+                'permissions' => [
+                    'permission' => [
+                        [
+                            'name' => 'manage_sh_access',
+                            'value' => 'true',
+                        ],
+                    ],
+                ],
+                'php-settings' => [
+                    'setting' => [
+                        [
+                            'name' => 'memory_limit',
+                            'value' => '128M',
+                        ],
+                        [
+                            'name' => 'safe_mode',
+                            'value' => 'false',
+                        ],
+                    ],
+                ],
+                'plan-name' => 'Unlimited',
+            ],
+        ];
+
+        $webspace = static::$_client->webspace()->request($request);
+
+        $this->assertGreaterThan(0, $webspace->id);
+
+        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
     public function testGet()
     {
-        $webspace = $this->createWebspace();
-        $webspaceInfo = $this->client->webspace()->get('id', $webspace->id);
-        $this->assertEquals($this->webspaceSiteName, $webspaceInfo->name);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
+        $webspace = static::_createWebspace();
+        $webspaceInfo = static::$_client->webspace()->get('id', $webspace->id);
 
-    public function testSet()
-    {
-        $webspace = $this->createWebspace();
-        $result = $this->client->webspace()->set('id', $webspace->id,
-            ['hosting' => ['vrt_hst' => ['property' => ['name' => 'ftp_password', 'value' => 'kjklasdjlkaj']]]]);
-        $this->assertGreaterThan(0, $result->id);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
+        $this->assertNotEmpty($webspaceInfo->name);
+        $this->assertEquals(0, $webspaceInfo->realSize);
 
-    public function testData()
-    {
-        $webspace = $this->createWebspace();
-        $webspaceInfo = $this->client->webspace()->getData('id', $webspace->id);
-        $this->assertEquals($this->webspaceSiteName, $webspaceInfo->genInfo->name);
-        $this->client->webspace()->delete('id', $webspace->id);
-    }
-
-    public function testDataAll()
-    {
-        $webspaceInfo = $this->client->webspace()->getData();
-        $this->assertGreaterThan(0, $webspaceInfo[0]->id);
-    }
-
-    public function testGetTrafficThisMonth()
-    {
-        $webspaceTraffic = $this->client->webspace()->getTraffic(
-            'name',
-            $this->trafficTestSite,
-            new \DateTime('@' . strtotime('first day of this month'))
-        );
-        $this->assertIsInt($webspaceTraffic->httpIn);
-    }
-
-    public function testGetTrafficLastMonth()
-    {
-        $webspaceTraffic = $this->client->webspace()->getTraffic(
-            'name',
-            $this->trafficTestSite,
-            new \DateTime('@' . strtotime('first day of previous month')),
-            new \DateTime('@' . strtotime('last day of previous month'))
-        );
-        $this->assertIsInt($webspaceTraffic->httpIn);
-    }
-
-    public function testGetTraffic()
-    {
-        $webspaceTraffic = $this->client->webspace()->getTraffic('name', $this->trafficTestSite);
-        $this->assertIsInt($webspaceTraffic->httpIn);
+        static::$_client->webspace()->delete('id', $webspace->id);
     }
 }

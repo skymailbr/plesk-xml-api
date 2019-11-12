@@ -1,12 +1,9 @@
 <?php
-
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
 class UiTest extends TestCase
 {
-
     private $_customButtonProperties = [
         'place' => 'admin',
         'url' => 'http://example.com',
@@ -15,7 +12,7 @@ class UiTest extends TestCase
 
     public function testGetNavigation()
     {
-        $navigation = $this->client->ui()->getNavigation();
+        $navigation = static::$_client->ui()->getNavigation();
         $this->assertIsArray($navigation);
         $this->assertGreaterThan(0, count($navigation));
         $this->assertArrayHasKey('general', $navigation);
@@ -29,26 +26,26 @@ class UiTest extends TestCase
 
     public function testCreateCustomButton()
     {
-        $buttonId = $this->client->ui()->createCustomButton('admin', $this->_customButtonProperties);
+        $buttonId = static::$_client->ui()->createCustomButton('admin', $this->_customButtonProperties);
         $this->assertGreaterThan(0, $buttonId);
 
-        $this->client->ui()->deleteCustomButton($buttonId);
+        static::$_client->ui()->deleteCustomButton($buttonId);
     }
 
     public function testGetCustomButton()
     {
-        $buttonId = $this->client->ui()->createCustomButton('admin', $this->_customButtonProperties);
-        $customButtonInfo = $this->client->ui()->getCustomButton($buttonId);
+        $buttonId = static::$_client->ui()->createCustomButton('admin', $this->_customButtonProperties);
+        $customButtonInfo = static::$_client->ui()->getCustomButton($buttonId);
         $this->assertEquals('http://example.com', $customButtonInfo->url);
         $this->assertEquals('Example site', $customButtonInfo->text);
 
-        $this->client->ui()->deleteCustomButton($buttonId);
+        static::$_client->ui()->deleteCustomButton($buttonId);
     }
 
     public function testDeleteCustomButton()
     {
-        $buttonId = $this->client->ui()->createCustomButton('admin', $this->_customButtonProperties);
-        $result = $this->client->ui()->deleteCustomButton($buttonId);
+        $buttonId = static::$_client->ui()->createCustomButton('admin', $this->_customButtonProperties);
+        $result = static::$_client->ui()->deleteCustomButton($buttonId);
         $this->assertTrue($result);
     }
 }

@@ -2,7 +2,7 @@
 
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
-namespace Tests;
+namespace PleskXTest;
 
 class SiteAliasTest extends TestCase
 {
@@ -18,10 +18,10 @@ class SiteAliasTest extends TestCase
     private function createWebspace()
     {
 
-        $ips = $this->client->ip()->get();
+        $ips = static::$_client->ip()->get();
         $ipInfo = reset($ips);
 
-        return $this->client->webspace()->create([
+        return static::$_client->webspace()->create([
             'gen_setup' => [
                 'name' => $this->webspaceSiteName,
                 'ip_address' => $ipInfo->ipAddress,
@@ -53,7 +53,7 @@ class SiteAliasTest extends TestCase
      */
     private function createSiteAlias($webspace)
     {
-        return $this->client->siteAlias()->create([
+        return static::$_client->siteAlias()->create([
             'site-id' => $webspace->id,
             'name' => $this->aliasName
         ]);
@@ -63,39 +63,42 @@ class SiteAliasTest extends TestCase
     {
         $webspace = $this->createWebspace();
         $siteAlias = $this->createSiteAlias($webspace);
-        $siteAlias = $this->client->siteAlias()->get('site-id', $webspace->id);
+        $siteAlias = static::$_client->siteAlias()->get('site-id', $webspace->id);
         $this->assertEquals($this->aliasName, $siteAlias[0]->name);
-        $this->client->siteAlias()->delete('id', $siteAlias[0]->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        static::$_client->siteAlias()->delete('id', $siteAlias[0]->id);
+        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
 
-    // public function testCreate() {
-    //     $webspace = $this->_createWebspace();
-    //     $siteAlias = $this->_createSiteAlias($webspace);
-    //     $this->assertIsInt($siteAlias->id);
-    //     $this->assertGreaterThan(0, $siteAlias->id);
-    //     $this->_client->siteAlias()->delete('id', $siteAlias->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testCreate()
+    {
+        $webspace = $this->_createWebspace();
+        $siteAlias = $this->createSiteAlias($webspace);
+        $this->assertIsInt($siteAlias->id);
+        $this->assertGreaterThan(0, $siteAlias->id);
+        static::$_client->siteAlias()->delete('id', $siteAlias->id);
+        static::$_client->webspace()->delete('id', $webspace->id);
+    }
 
-    // public function testDelete() {
-    //     $webspace = $this->_createWebspace();
-    //     $siteAlias = $this->_createSiteAlias($webspace);
-    //     $result = $this->_client->siteAlias()->delete('id', $siteAlias->id);
-    //     $this->assertTrue($result);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+    public function testDelete()
+    {
+        $webspace = $this->_createWebspace();
+        $siteAlias = $this->createSiteAlias($webspace);
+        $result = static::$_client->siteAlias()->delete('id', $siteAlias->id);
+        $this->assertTrue($result);
+        static::$_client->webspace()->delete('id', $webspace->id);
+    }
 
-    // public function testRename() {
+    public function testRename()
+    {
 
-    //     $webspace = $this->_createWebspace();
-    //     $siteAlias = $this->_createSiteAlias($webspace);
-    //     $result = $this->_client->siteAlias()->rename('id', $siteAlias->id, $this->aliasNewName);
-    //     $this->assertTrue($result);
-    //     $siteAlias = $this->_client->siteAlias()->get('id', $siteAlias->id);
-    //     $this->assertEquals($this->aliasNewName, $siteAlias->name);
-    //     $this->_client->siteAlias()->delete('id', $siteAlias->id);
-    //     $this->_client->webspace()->delete('id', $webspace->id);
-    // }
+        $webspace = $this->_createWebspace();
+        $siteAlias = $this->createSiteAlias($webspace);
+        $result = static::$_client->siteAlias()->rename('id', $siteAlias->id, $this->aliasNewName);
+        $this->assertTrue($result);
+        $siteAlias = static::$_client->siteAlias()->get('id', $siteAlias->id);
+        $this->assertEquals($this->aliasNewName, $siteAlias->name);
+        static::$_client->siteAlias()->delete('id', $siteAlias->id);
+        static::$_client->webspace()->delete('id', $webspace->id);
+    }
 }

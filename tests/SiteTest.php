@@ -1,113 +1,105 @@
 <?php
+// Copyright 1999-2019. Plesk International GmbH.
+namespace PleskXTest;
 
-// Copyright 1999-2015. Parallels IP Holdings GmbH.
-
-namespace Tests;
+use PleskXTest\Utility\KeyLimitChecker;
 
 class SiteTest extends TestCase
 {
+    /** @var \PleskX\Api\Struct\Webspace\Info */
+    private static $webspace;
 
-    private $webspaceSiteName = 'example-test-parent.dom';
-    private $siteName = 'example-test-child.dom';
-
-    /**
-     *
-     *
-     * @return \PleskX\Api\Struct\Webspace\Info
-     */
-    private function createWebspace()
+    public static function setUpBeforeClass(): void
     {
-
-        $ips = $this->client->ip()->get();
-        $ipInfo = reset($ips);
-
-        return $this->client->webspace()->create([
-            'gen_setup' => [
-                'name' => $this->webspaceSiteName,
-                'ip_address' => $ipInfo->ipAddress,
-                'htype' => 'vrt_hst'
-            ],
-            'hosting' => [
-                'vrt_hst' => [
-                    [
-                        'property' => [
-                            'name' => 'ftp_login',
-                            'value' => 'ftpusertest',
-                        ]
-                    ],
-                    [
-                        'property' => [
-                            'name' => 'ftp_password',
-                            'value' => 'ftpuserpasswordtest',
-                        ]
-                    ],
-                    'ip_address' => $ipInfo->ipAddress
-                ],
-            ],
-            'plan-name' => 'basic'
-        ]);
+        parent::setUpBeforeClass();
+        static::$webspace = static::_createWebspace();
     }
 
-    /**
-     * @return \PleskX\Api\Struct\Webspace\Info
-     */
-    private function createSite($webspace)
+    protected function setUp(): void
     {
-        return $this->client->site()->create([
-            'gen_setup' => [
-                'name' => $this->siteName,
-                'webspace-id' => $webspace->id
-            ],
-        ]);
+        parent::setUp();
+
+        $keyInfo = static::$_client->server()->getKeyInfo();
+
+        if (!KeyLimitChecker::checkByType($keyInfo, KeyLimitChecker::LIMIT_DOMAINS, 2)) {
+            $this->markTestSkipped('License does not allow to create more than 1 domain.');
+        }
+    }
+
+    private function _createSite($name, array $properties = [])
+    {
+        $properties = array_merge([
+            'name' => $name,
+            'webspace-id' => static::$webspace->id,
+        ], $properties);
+        return static::$_client->site()->create($properties);
     }
 
     public function testCreate()
     {
-        $webspace = $this->createWebspace();
-        $site = $this->createSite($webspace);
-        $this->assertIsInt($site->id);
+        $site = $this->_createSite('addon.dom');
+
+        $this->assertIsNumeric($site->id);
         $this->assertGreaterThan(0, $site->id);
-        $this->client->site()->delete('id', $site->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+
+        static::$_client->site()->delete('id', $site->id);
     }
 
     public function testDelete()
     {
-        $webspace = $this->createWebspace();
-        $site = $this->createSite($webspace);
-        $result = $this->client->site()->delete('id', $site->id);
+        $site = $this->_createSite('addon.dom');
+
+        $result = static::$_client->site()->delete('id', $site->id);
         $this->assertTrue($result);
-        $this->client->webspace()->delete('id', $webspace->id);
     }
 
     public function testGet()
     {
-        $webspace = $this->createWebspace();
-        $site = $this->createSite($webspace);
-        $siteInfo = $this->client->site()->get('id', $site->id);
-        $this->assertEquals($this->siteName, $siteInfo->name);
-        $this->client->site()->delete('id', $site->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $site = $this->_createSite('addon.dom');
+
+        $siteInfo = static::$_client->site()->get('id', $site->id);
+        $this->assertEquals('addon.dom', $siteInfo->name);
+
+        static::$_client->site()->delete('id', $site->id);
     }
 
-    public function testData()
+    public function testGetHostingWoHosting()
     {
-        $webspace = $this->createWebspace();
-        $site = $this->createSite($webspace);
-        $siteInfo = $this->client->site()->getData('id', $site->id);
-        $this->assertEquals($this->siteName, $siteInfo->genInfo->name);
-        $this->assertEquals($site->id, $siteInfo->id);
-        $this->client->site()->delete('id', $site->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $site = $this->_createSite('addon.dom');
+
+        $siteHosting = static::$_client->site()->getHosting('id', $site->id);
+        $this->assertNull($siteHosting);
+
+        static::$_client->site()->delete('id', $site->id);
     }
 
-    public function testDataSearchBySpace()
+    public function testGetHostingWithHosting()
     {
-        $webspace = $this->createWebspace();
-        $site = $this->createSite($webspace);
-        $siteInfo = $this->client->site()->getData('parent-id', $webspace->id);
-        $this->assertEquals($this->siteName, $siteInfo[0]->genInfo->name);
-        $this->client->site()->delete('id', $site->id);
-        $this->client->webspace()->delete('id', $webspace->id);
+        $properties = [
+            'hosting' => [
+                'www_root' => 'addon.dom',
+            ],
+        ];
+        $site = $this->_createSite('addon.dom', $properties);
+
+        $siteHosting = static::$_client->site()->getHosting('id', $site->id);
+        $this->assertArrayHasKey('www_root', $siteHosting->properties);
+        $this->assertStringEndsWith('addon.dom', $siteHosting->properties['www_root']);
+
+        static::$_client->site()->delete('id', $site->id);
+    }
+
+    public function testGetAll()
+    {
+        $site = $this->_createSite('addon.dom');
+        $site2 = $this->_createSite('addon2.dom');
+
+        $sitesInfo = static::$_client->site()->getAll();
+        $this->assertCount(2, $sitesInfo);
+        $this->assertEquals('addon.dom', $sitesInfo[0]->name);
+        $this->assertEquals('addon.dom', $sitesInfo[0]->asciiName);
+
+        static::$_client->site()->delete('id', $site->id);
+        static::$_client->site()->delete('id', $site2->id);
     }
 }
