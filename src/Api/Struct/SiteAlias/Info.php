@@ -11,11 +11,16 @@ class Info extends \PleskX\Api\Struct
     /** @var integer */
     public $id;
 
+    /**
+     * Info constructor.
+     * @param $apiResponse
+     * @throws \Exception
+     */
     public function __construct($apiResponse)
     {
         $this->_initScalarProperties($apiResponse, [
             'id',
-            'status',
+            'status'
         ]);
     }
 }

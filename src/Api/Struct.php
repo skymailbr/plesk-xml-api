@@ -31,7 +31,7 @@ abstract class Struct
 
             $reflectionProperty = new \ReflectionProperty($this, $classPropertyName);
             $docBlock = $reflectionProperty->getDocComment();
-            $propertyType = preg_replace('/^.+ @var ([a-z]+) .+$/', '\1', $docBlock);
+            $propertyType = preg_replace('/^.+ @var ([a-z\\\]+) .+$/i', '\1', $docBlock);
 
             if ('string' == $propertyType) {
                 $value = (string)$value;
@@ -39,6 +39,8 @@ abstract class Struct
                 $value = (int)$value;
             } else if ('boolean' == $propertyType) {
                 $value = in_array((string)$value, ['true', 'on', 'enabled']);
+            } elseif (class_exists($propertyType)) {
+                $value = new $propertyType($value);
             } else {
                 throw new \Exception("Unknown property type '$propertyType'.");
             }

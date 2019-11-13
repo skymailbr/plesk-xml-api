@@ -36,6 +36,42 @@ class Operator
     }
 
     /**
+     * @param $command
+     * @param array $properties
+     * @param string $mode Client response mode
+     * @return \PleskX\Api\XmlResponse
+     * @throws \Exception
+     */
+    protected function _process($command, array $properties, $mode = Client::RESPONSE_SHORT)
+    {
+        $packet = $this->_client->getPacket();
+        $info = $packet
+            ->addChild($this->_wrapperTag)
+            ->addChild($command);
+
+        $set = function ($name, $value, \SimpleXMLElement $node) use (&$set, &$packet) {
+            if (is_array($value)) {
+                $node = $node->addChild($name);
+                foreach ($value as $name => $v) {
+                    $set($name, $v, $node);
+                }
+            } else {
+                if (false !== strpos($value, '&')) {
+                    $node->$name = $value;
+                    return;
+                }
+                $node->addChild($name, $value);
+            }
+        };
+
+        foreach ($properties as $name => $value) {
+            $set($name, $value, $info);
+        }
+
+        return $this->_client->request($packet, $mode);
+    }
+
+    /**
      * Perform plain API request
      *
      * @param string|array $request
@@ -55,7 +91,6 @@ class Operator
                 $request = "<$wrapperTag>$request</$wrapperTag>";
             }
         }
-
         return $this->_client->request($request, $mode);
     }
 
@@ -66,6 +101,7 @@ class Operator
      * @param integer|string|null $value
      * @param callable|null $filter
      * @return mixed
+     * @throws \Exception
      */
     protected function _getItems($structClass, $infoTag, $field = null, $value = null, callable $filter = null)
     {

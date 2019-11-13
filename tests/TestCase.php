@@ -51,18 +51,24 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @return \PleskX\Api\Struct\Webspace\Info
      */
-    protected static function _createWebspace()
+    protected static function _createWebspace(array $properties = [], array $hostingProperties = [], $planName = '')
     {
         $id = uniqid();
-        $webspace = static::$_client->webspace()->create(
-            [
+        if (empty($properties)) {
+            $properties = [
                 'name' => "test{$id}.test",
                 'ip_address' => static::_getIpAddress(),
-            ], [
+            ];
+        }
+
+        if (empty($hostingProperties)) {
+            $hostingProperties = [
                 'ftp_login' => "u{$id}",
                 'ftp_password' => PasswordProvider::STRONG_PASSWORD,
-            ]
-        );
+            ];
+        }
+
+        $webspace = static::$_client->webspace()->create($properties, $hostingProperties, $planName);
         self::$webspaces[] = $webspace;
 
         return $webspace;

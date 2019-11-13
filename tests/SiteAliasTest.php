@@ -6,99 +6,80 @@ namespace PleskXTest;
 
 class SiteAliasTest extends TestCase
 {
-    private $webspaceSiteName = 'example-test-parent.dom';
+    /** @var \PleskX\Api\Struct\Webspace\Info */
+    private static $webspace;
+
+    /** @var string */
+    private static $webspaceName;
+
+    /** @var string */
     private $aliasName = 'example-test-alias.dom';
+
+    /** @var string */
     private $aliasNewName = 'example-new-name-alias.dom';
 
-    /**
-     *
-     *
-     * @return \PleskX\Api\Struct\Webspace\Info
-     */
-    private function createWebspace()
+    public static function setUpBeforeClass(): void
     {
-
-        $ips = static::$_client->ip()->get();
-        $ipInfo = reset($ips);
-
-        return static::$_client->webspace()->create([
-            'gen_setup' => [
-                'name' => $this->webspaceSiteName,
-                'ip_address' => $ipInfo->ipAddress,
-                'htype' => 'vrt_hst'
-            ],
-            'hosting' => [
-                'vrt_hst' => [
-                    [
-                        'property' => [
-                            'name' => 'ftp_login',
-                            'value' => 'ftpusertest',
-                        ]
-                    ],
-                    [
-                        'property' => [
-                            'name' => 'ftp_password',
-                            'value' => 'ftpuserpasswordtest',
-                        ]
-                    ],
-                    'ip_address' => $ipInfo->ipAddress
-                ],
-            ],
-            'plan-name' => 'basic'
-        ]);
+        parent::setUpBeforeClass();
+        static::$webspace = static::_createWebspace();
+        $webSpaceInfo = static::$_client->webspace()->get('id', static::$webspace->id);
+        static::$webspaceName = $webSpaceInfo->name;
     }
 
     /**
      * @return \PleskX\Api\Struct\SiteAlias\Info
+     * @throws \Exception
      */
-    private function createSiteAlias($webspace)
+    private function createSiteAlias()
     {
         return static::$_client->siteAlias()->create([
-            'site-id' => $webspace->id,
+            'site-id' => static::$webspace->id,
             'name' => $this->aliasName
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testGetSearchBySiteName()
     {
-        $webspace = $this->createWebspace();
-        $siteAlias = $this->createSiteAlias($webspace);
-        $siteAlias = static::$_client->siteAlias()->get('site-id', $webspace->id);
-        $this->assertEquals($this->aliasName, $siteAlias[0]->name);
-        static::$_client->siteAlias()->delete('id', $siteAlias[0]->id);
-        static::$_client->webspace()->delete('id', $webspace->id);
+        $this->createSiteAlias();
+        $siteAlias = static::$_client->siteAlias()->get('name', $this->aliasName);
+        $this->assertEquals($this->aliasName, $siteAlias->name);
+        static::$_client->siteAlias()->delete('id', $siteAlias->id);
     }
 
-
+    /**
+     * @throws \Exception
+     */
     public function testCreate()
     {
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->createSiteAlias($webspace);
+        $siteAlias = $this->createSiteAlias();
         $this->assertIsInt($siteAlias->id);
         $this->assertGreaterThan(0, $siteAlias->id);
         static::$_client->siteAlias()->delete('id', $siteAlias->id);
-        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testDelete()
     {
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->createSiteAlias($webspace);
+        $siteAlias = $this->createSiteAlias();
         $result = static::$_client->siteAlias()->delete('id', $siteAlias->id);
         $this->assertTrue($result);
-        static::$_client->webspace()->delete('id', $webspace->id);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testRename()
     {
-
-        $webspace = $this->_createWebspace();
-        $siteAlias = $this->createSiteAlias($webspace);
+        $siteAlias = $this->createSiteAlias();
         $result = static::$_client->siteAlias()->rename('id', $siteAlias->id, $this->aliasNewName);
         $this->assertTrue($result);
         $siteAlias = static::$_client->siteAlias()->get('id', $siteAlias->id);
         $this->assertEquals($this->aliasNewName, $siteAlias->name);
         static::$_client->siteAlias()->delete('id', $siteAlias->id);
-        static::$_client->webspace()->delete('id', $webspace->id);
     }
 }

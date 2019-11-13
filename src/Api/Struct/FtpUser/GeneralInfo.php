@@ -2,32 +2,39 @@
 
 // Copyright 1999-2015. Parallels IP Holdings GmbH.
 
-namespace PleskX\Api\Struct\Database;
+namespace PleskX\Api\Struct\FtpUser;
 
 class GeneralInfo extends \PleskX\Api\Struct
 {
 
     /** @var integer */
     public $id;
+
     /** @var string */
     public $name;
+
     /** @var string */
-    public $type;
+    public $home;
+
     /** @var integer */
-    public $dbServerId;
-    /** @var integer */
-    public $defaultUserId;
+    public $quota;
+
     /** @var integer */
     public $webspaceId;
+
+    /**
+     * GeneralInfo constructor.
+     * @param $apiResponse
+     * @throws \Exception
+     */
     public function __construct($apiResponse)
     {
-        $this->initScalarProperties($apiResponse, [
+        $this->_initScalarProperties($apiResponse, [
             'id',
             'name',
-            'type',
+            'home',
+            'quota',
             ['webspace-id' => 'webspaceId'],
-            ['default-user-id' => 'defaultUserId'],
-            ['db-server-id' => 'dbServerId'],
         ]);
     }
 }

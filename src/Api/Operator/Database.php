@@ -17,27 +17,6 @@ class Database extends \PleskX\Api\Operator
     }
 
     /**
-     * @param $command
-     * @param array $properties
-     * @return \PleskX\Api\XmlResponse
-     */
-    private function _process($command, array $properties)
-    {
-        $packet = $this->_client->getPacket();
-        $info = $packet->addChild($this->_wrapperTag)->addChild($command);
-
-        foreach ($properties as $name => $value) {
-            if (false !== strpos($value, '&')) {
-                $info->$name = $value;
-                continue;
-            }
-            $info->addChild($name, $value);
-        }
-
-        return $this->_client->request($packet);
-    }
-
-    /**
      * @param $properties
      * @return Struct\UserInfo
      */
@@ -74,32 +53,12 @@ class Database extends \PleskX\Api\Operator
      */
     public function getAll($field, $value)
     {
-        $response = $this->_get('get-db', $field, $value);
+        $response = $this->request("get-db.filter.$field=$value");
         $items = [];
         foreach ($response->xpath('//result') as $xmlResult) {
             $items[] = new Struct\Info($xmlResult);
         }
         return $items;
-    }
-
-    /**
-     * @param $command
-     * @param $field
-     * @param $value
-     * @return \PleskX\Api\XmlResponse
-     */
-    private function _get($command, $field, $value)
-    {
-        $packet = $this->_client->getPacket();
-        $getTag = $packet->addChild($this->_wrapperTag)->addChild($command);
-
-        $filterTag = $getTag->addChild('filter');
-        if (!is_null($field)) {
-            $filterTag->addChild($field, $value);
-        }
-
-        $response = $this->_client->request($packet, \PleskX\Api\Client::RESPONSE_FULL);
-        return $response;
     }
 
     /**
@@ -120,7 +79,7 @@ class Database extends \PleskX\Api\Operator
      */
     public function getAllUsers($field, $value)
     {
-        $response = $this->_get('get-db-users', $field, $value);
+        $response = $this->request("get-db-users.filter.$field=$value");
         $items = [];
         foreach ($response->xpath('//result') as $xmlResult) {
             $items[] = new Struct\UserInfo($xmlResult);

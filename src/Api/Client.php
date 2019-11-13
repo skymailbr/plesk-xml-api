@@ -134,6 +134,7 @@ class Client
      * @param string|array|SimpleXMLElement $request
      * @param int $mode
      * @return XmlResponse
+     * @throws \Exception
      */
     public function request($request, $mode = self::RESPONSE_SHORT)
     {
@@ -141,7 +142,6 @@ class Client
             $request = $request->asXml();
         } else {
             $xml = $this->getPacket();
-
             if (is_array($request)) {
                 $request = $this->_arrayToXml($request, $xml)->asXML();
             } else {
@@ -541,6 +541,14 @@ class Client
     public function aps()
     {
         return $this->_getOperator('Aps');
+    }
+
+    /**
+     * @return Operator\FtpUser
+     */
+    public function ftpUser()
+    {
+        return $this->_getOperator('FtpUser');
     }
 
     /**
