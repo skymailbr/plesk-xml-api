@@ -3,8 +3,6 @@
 
 namespace PleskX\Api;
 
-use SimpleXMLElement;
-
 /**
  * Client for Plesk XML-RPC API
  */
@@ -118,27 +116,27 @@ class Client
      * Retrieve XML template for packet
      *
      * @param string|null $version
-     * @return SimpleXMLElement
+     * @return SimpleXMLElementExtended
      */
     public function getPacket($version = null)
     {
         $protocolVersion = !is_null($version) ? $version : $this->_version;
         $content = "<?xml version='1.0' encoding='UTF-8' ?>";
         $content .= "<packet" . ("" === $protocolVersion ? "" : " version='$protocolVersion'") . "/>";
-        return new SimpleXMLElement($content);
+        return new SimpleXMLElementExtended($content);
     }
 
     /**
      * Perform API request
      *
-     * @param string|array|SimpleXMLElement $request
+     * @param string|array|SimpleXMLElementExtended $request
      * @param int $mode
      * @return XmlResponse
      * @throws \Exception
      */
     public function request($request, $mode = self::RESPONSE_SHORT)
     {
-        if ($request instanceof SimpleXMLElement) {
+        if ($request instanceof SimpleXMLElementExtended) {
             $request = $request->asXml();
         } else {
             $xml = $this->getPacket();
@@ -153,7 +151,7 @@ class Client
 
         if ('sdk' == $this->_protocol) {
             $version = ('' == $this->_version) ? null : $this->_version;
-            $requestXml = new SimpleXMLElement((string)$request);
+            $requestXml = new SimpleXMLElementExtended((string)$request);
             $xml = \pm_ApiRpc::getService($version)->call($requestXml->children()[0]->asXml(), $this->_login);
         } else {
             $xml = $this->_performHttpRequest($request);
@@ -211,7 +209,7 @@ class Client
         $requestXml = $this->getPacket();
 
         foreach ($requests as $request) {
-            if ($request instanceof SimpleXMLElement) {
+            if ($request instanceof SimpleXMLElementExtended) {
                 throw new Client\Exception('SimpleXML type of request is not supported for multi requests.');
             } else {
                 if (is_array($request)) {
@@ -290,17 +288,21 @@ class Client
      * Expand short syntax (some.method.call) into full XML representation
      *
      * @param string $request
-     * @param SimpleXMLElement $xml
+     * @param SimpleXMLElementExtended $xml
      * @return string
      */
-    protected function _expandRequestShortSyntax($request, SimpleXMLElement $xml)
+    protected function _expandRequestShortSyntax($request, SimpleXMLElementExtended $xml)
     {
         $parts = explode('.', $request);
         $node = $xml;
 
         foreach ($parts as $part) {
             @list($name, $value) = explode('=', $part);
-            $node = $node->addChild($name, $value);
+            if ($value) {
+                $node = $node->addChildWithCDATA($name, $value);
+            } else {
+                $node = $node->addChild($name, $value);
+            }
         }
 
         return $xml->asXML();
@@ -310,18 +312,22 @@ class Client
      * Convert array to XML representation
      *
      * @param array $array
-     * @param SimpleXMLElement $xml
+     * @param SimpleXMLElementExtended $xml
      * @param string $parentEl
-     * @return SimpleXMLElement
+     * @return SimpleXMLElementExtended
      */
-    protected function _arrayToXml(array $array, SimpleXMLElement $xml, $parentEl = null)
+    protected function _arrayToXml(array $array, SimpleXMLElementExtended $xml, $parentEl = null)
     {
         foreach ($array as $key => $value) {
             $el = is_int($key) && $parentEl ? $parentEl : $key;
             if (is_array($value)) {
                 $this->_arrayToXml($value, $this->_isAssocArray($value) ? $xml->addChild($el) : $xml, $el);
             } else {
-                $xml->addChild($el, $value);
+                if ($value) {
+                    $xml->addChildWithCDATA($el, $value);
+                } else {
+                    $xml->addChild($el, $value);
+                }
             }
         }
 
